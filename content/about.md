@@ -18,5 +18,5 @@ Since that I've been working on:
 * Face detection and recognition projects,
 * Hundreds of hours of consultation work for small and large companies,
 
-My field of expertise are in interoperability, servicing, IT automation and infrastructure, collaboration. I guess in today's terms  I would be called a DevOps engineer.
+My field of expertise are in interoperability, cloud services, IT automation and infrastructure, collaboration. I guess in today's terms  I would be called a DevOps engineer.
 In the past few years been working on a hybrid cloud solution integrating ~60 different cloud providers with our on-premise storage servers at [OpenStorage.io](https://openstorage.io) as the CTO.
