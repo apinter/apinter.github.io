@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>YAL/TB</title>
+    <link>https://apinter.github.io/</link>
+    <description>Recent content on YAL/TB</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>GNU FDL 1.3</copyright>
+    <lastBuildDate>Sun, 31 Jan 2021 19:33:46 +0700</lastBuildDate><atom:link href="https://apinter.github.io/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Initial Commit</title>
+      <link>https://apinter.github.io/posts/initial-commit/</link>
+      <pubDate>Sun, 31 Jan 2021 19:33:46 +0700</pubDate>
+      
+      <guid>https://apinter.github.io/posts/initial-commit/</guid>
+      <description>Purpose First of all this a GNU/Linux - and mostly openSUSE - focused technical blog with a bunch of know-how, tools, personal recommendations. Recently had this realization that the content I&amp;rsquo;m keeping in my QOwnNotes would be a little bit more valuable if&amp;hellip;
+ ..it would be available publicly, ..it would be DDG/Google searchable, ..I could just link to it when I&amp;rsquo;m helping others AkA &amp;ldquo;laziness&amp;rdquo;.  Being active in different communities, I run into a lot of repeated questions.</description>
+    </item>
+    
+    <item>
+      <title>About</title>
+      <link>https://apinter.github.io/about/</link>
+      <pubDate>Sun, 31 Jan 2021 00:00:00 +0000</pubDate>
+      
+      <guid>https://apinter.github.io/about/</guid>
+      <description>whoami My name is Attila Pinter. I&amp;rsquo;ve been into computers since I was 6 years old. I got deep into Linux when I was 14, fast forward to today and Linux is what I make a living with. Been studying IT in my younger years, but schools were not as great at teaching or knowledge transfer as the community is. I did spent a month at university - which I got into with full scholarship -, but considered it a waste of my time and bailed.</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>https://apinter.github.io/archives/</link>
+      <pubDate>Tue, 28 May 2019 00:00:00 +0000</pubDate>
+      
+      <guid>https://apinter.github.io/archives/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>
