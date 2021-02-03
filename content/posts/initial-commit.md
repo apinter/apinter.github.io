@@ -44,6 +44,10 @@ A list of items/topics to be covered here in no particular order:
   * Ansible 
   * Bash scripting
   * Python
+* Git
+  * Git workflow
+  * Resolving merge conflicts
+  * [Syncing upstream with fork]({{< ref "git-sync-upstream-fork.md" >}} "Syncing upstream with fork")
 * Generic
   * Server setup with openSUSE
   * Hybrid cloud
