@@ -6,17 +6,17 @@ tags: ["Podman","container","automation"]
 ---
 ## What is Podman
 
-Podman is a a daemonless, open-source tool to manage, deploy and build application containers. Podman usese Open Containers Initiative (OCI) Containers and container images, which mean that containers crated with/for Docker or CRI-o will work with Podman as well and vice versa. It is coming with a command line interface (CLI) which pretty much offers the same commands like Docker does. How similar are podman commands to docker's? Let's put it this way: many Podman just alias `docker` to `podman`. Like other runtimes, podman also relies on an OCI comliant container runtime to interface with the operating system. Podamn also has a RESTful API to manage containers, offers automatic updates of containers and has a fantastic `systemd` integration.
+Podman is a a daemonless, open-source tool to manage, deploy and build application containers. Podman is using Open Containers Initiative (OCI) Containers and container images, which means that containers crated with/for Docker or CRI-o will work with Podman as well and vice versa. It is coming with a command line interface (CLI) which offers pretty much the same commands like Docker does. How similar are Podman commands to Docker's? Let's put it this way: many Podman users just alias `docker` to `podman`. Like other runtimes, Podman also relies on an OCI compliant container runtime to interface with the operating system. Podamn also has a RESTful API to manage containers, offers automatic updates of containers and has a fantastic `systemd` integration.
 
 ## Why Podman?
 
-Due to a number of issues around Docker, the way they interact and treat the community and the number of ignored security issues my choice of container management software falls on Podman. Podman has the same and in many cases better abilities than Docker. Podman supports `pods` which can be implemented on a standalone server and moved to others or even deployed in K8S.
+Due to a number of issues around Docker, the way they interact with and treat the community and the number of ignored security issues my choice of container management software falls on Podman. Podman has the same and in many cases better abilities than Docker. Podman supports `pods` which can be implemented on a standalone server and moved to others or even deployed in K8S.
 
 ## Before and after (a recap)
 
-Previously we had everything running in KVM VMs. This required over 200GB of ram and 32 cores over 2 Xeon Silver CPUs. Expensive. With choice of Podman and containerization of our infra we reduced that hardware requirement to about 10% of it. This is able to sustain almost all of our requirements in a containerized format at a significantly lower TCO.
+Previously we had everything running on KVM servers in VMs. This required over 200GB of ram and 32 cores over 2 Xeon Silver CPUs. Expensive. With the move to Podman and containerization of our infra we reduced that hardware requirement to about 10% of the KVM setup. This is able to sustain almost all of our requirements in a containerized format at a significantly lower total-cost-of-ownership (TCO).
 
-The barrier of entry for containers is low and to make thing even easier I use openSUSE MicroOS as the host of my podman services. However, keeping the containers up-to-date and running 24/7 requires some deeper understanding and knowledge. 
+The barrier of entry for containers is low and to make thing even easier I use openSUSE MicroOS as the host of my Podman services. However, keeping the containers up-to-date and running 24/7 requires some deeper understanding and knowledge. 
 
 ## Getting containers running
 
@@ -45,7 +45,7 @@ registries = []
 [registries.block]
 registries = []
 ```
-As I'm using openSUSE I do have `registry.opensuse.org` added to my registries. You can add for example `quay.io` to this list to be able to search, pull, and push to Quay.
+As I'm using openSUSE so I do have `registry.opensuse.org` added to my registries out of the box. You can add for example `quay.io` to this list to be able to search, pull, and push from/to Quay.
 
 #### Login to registry
 
@@ -53,7 +53,7 @@ Just like with Docker you can log in to a registry with your username and passwo
 
 ### Searching for a container
 
-To search with podman for an application use:
+To search with Podman for an application use:
 ```
 $ podman search nginx                                                                                                                                                     
 INDEX         NAME                                                                                                                  DESCRIPTION                                      STARS   OFFICIAL  AUTOMATED
@@ -79,7 +79,7 @@ docker.io     docker.io/library/nginx                                           
 docker.io     docker.io/jwilder/nginx-proxy                                                                                         Automated Nginx reverse proxy for docker con...  1951              [OK]
 ```
 
-To search in a spcific repository:
+To search in a specific repository:
 ```
 $ podman search registry.opensuse.org/nginx                                                                                                                               
 INDEX         NAME                                                                                                                  DESCRIPTION  STARS   OFFICIAL  AUTOMATED
@@ -149,7 +149,7 @@ Storing signatures
 ### Starting a container
 
 #### Rootfull or rootless
-As Podman is daemonless running containers doesn't require running them with root, but can be started with a user as well. Granted, rootless containers will have no access to networking and can't use priviliged ports, but it is a great way to keep the system secure. For instance if an application escapes the container ran as a user it will be able to cause less damage and would have limited access to the system than if it would be ran as root. Rootfull containers are recommended for running applications that require access over priviliged ports like a public facing nginx reverse proxy. Even in that case there could be some rules implemented in the firewall that forwards requests, but that's a different story.
+As Podman is daemonless running containers doesn't require running them with root, but can be started with a user as well. Granted, rootless containers will have no access to networking and can't use privileged ports, but it is a great way to keep the system secure. For instance if an application escapes the container ran as a user it will be able to cause less damage and would have limited access to the system than if it would if it would ran as root. Rootfull containers are recommended for running applications that require access over privileged ports like a public facing `nginx` reverse proxy. Even in that case there could be some rules implemented in the firewall that forwards requests, but that's a different story.
 
 Starting a container that runs in the background and exposing port 8000 to be accessible from the outside:
 ```
@@ -222,8 +222,8 @@ docker.io/prom/prometheus                  latest  19162aa1f28d  2 weeks ago  17
 To list all available images use `podman images`. This will provide a list of every image that is currently available in the system and ready to be used without needing to pull it from a registry. To delete an image use `podman rmi`. Visit the `podman images` man page for more.
 
 ### Podman Pods
-The pod concept has been introduced in Kuberentes and Docker users usually don't even think of the possibility or benefits to run pods in a local runtime or a development environment. Pods are great if for example you need a database (db) container that you don't want to bind it to a routable network. In comes the pod. Instead of binding the db to a routable network one can bind it to `localhost` therefore other containers within the pod can connect to it using `localhost` as they share the network name space. Another use case can be to group containers in pods. 
-Every pod has an 'infra' container that functions as the namespace holder, stores data on port bindings, cgroup-parent values, and kernel namespaces are all assigned to the “infra” container. Once the pod is created these values can not be changed. The pod can also allows one to start, stop, pause multiple containers at once just by doing the same, but instead by container the commands can be executed by pods resuting of a desired effect, but faster and a lot more comfortably.   
+The `pod` concept has been introduced in Kuberentes and Docker users usually don't even think of the possibility or benefits to run pods in a local runtime or a development environment. Pods are great if for example you need a database (db) container that you don't want to bind to a routable network. In comes the idea of the `pod`. Instead of binding the db to a routable network you can bind it to `localhost` therefore other containers within the pod can connect to it using `localhost` as they share the network name space. Another use case can be to group containers in pods. 
+Every pod has an 'infra' container that functions as the namespace holder, stores data on port bindings, cgroup-parent values, and kernel namespaces are all assigned to the “infra” container. Once the pod is created these values can not be changed. The pod can also allow to start, stop, pause multiple containers at once just by doing the same as would with a single container, but instead by container the commands can be executed by pods resulting of a desired effect, but faster and a lot more comfortably.   
 For details on pod related cli commands visit the `podman pod` man page. 
 
 #### Pod creation
@@ -257,12 +257,12 @@ CONTAINER ID  IMAGE                 COMMAND          CREATED         STATUS     
 4a696258e500  k8s.gcr.io/pause:3.2                   10 minutes ago  Up 15 seconds ago  0.0.0.0:8000->8000/tcp  7244e77552d9-infra  7244e77552d9  yaltb
 ```
 Breaking it down:
-* `podman run -d --pod yaltb nginx` will create and add an nginx container to the previously create `yaltb` pod. The pod has been defined by the `--pod` flag followed by the name of the pod. Notice that we didn't expose ports as they are already exposed in the created port. **Important:** network can't be configured when it is shared with a pod therefore you need to expose/publish ports upon pod creation.
+* `podman run -d --pod yaltb nginx` will create and add an `nginx` container to the previously create `yaltb` pod. The pod has been defined by the `--pod` flag followed by the name of the pod. Notice that we didn't expose ports as they are already exposed in the created port. **Important:** network can't be configured when it is shared with a pod therefore you need to expose/publish ports upon pod creation.
 * `podman ps -a --pod` will list every container that is running in pods.
 
 #### Managing containers in pods
 
-Contaiers in pods can be managed individually regardless they're running within a pod. Do check above for the options for managing containers. This means that if you need to remove a container from a pod 
+Containers in pods can be managed individually regardless they're running within a pod. Do check above for the options for managing containers. This means that if you need to remove a container from a pod 
 
 #### Exporting pods
 Pods can be exported with `podman generate` command. This would allow one to take the exported pod and deploy it the same way it is deployed on the local runtime on a different Podman server or even on a Kubernetes cluster.
@@ -367,17 +367,17 @@ c78bebfb3cc3  k8s.gcr.io/pause:3.2                   30 seconds ago  Up 30 secon
 Lets break down the above:
 * `podman generate kube yaltb` will generated a `YAML` file which one can take to another server and `play` it providing the same exact pod that it is running on the local runtime.
 * `podman pod stop yaltb` will stop the `yaltb` pod and all the containers in it.
-* `podman pod rm yaltbh` will delete the `yaltb` pod.
+* `podman pod rm yaltb` will delete the `yaltb` pod.
 * `podman play kube yaltb_pod.yml` will start the exported pods based on the `YAML` file. The pod and the containers in the pod listed in the following commands.
 
 ### Podman and systemd
 
-Podman has a fantastic integration with `systemd`. I believe at this point the users are even able to run systemd **within** a container which makes perfect sense. Why would we have to use anything different inside a container than we already got used to outside of a container. Anyhow we nt covering this, but managing containers with systemd. 
-As we deploy more and more containers managing them using the podman cli tool only may quickly become burdensome. It is much easier to manage the pods and containers with systemd for example to restart, stop, or to start them. Using systemd will also enable us to utilize "podman auto-update" for updating the containers.
+Podman has a fantastic integration with `systemd`. I believe at this point the users are even able to run `systemd` **within** a container which makes perfect sense. Why would we have to use anything different inside a container than we already got used to outside of a container. Anyhow we not covering this, but managing containers with `systemd`. 
+As we deploy more and more containers managing them using the Podman cli tool only may quickly become burdensome. It is much easier to manage the pods and containers with `systemd` for example to restart, stop, or to start them. Using `systemd` will also enable us to utilize `podman auto-update` for updating the containers.
 
 #### Generating a systemd unit
 
-Podman has the ability to generate the unit files for us which is probably a relief as it makes life incredibly comfortable. Criteria is that it outputs the generated units into a file using the container's name or ID. In this example I will go for the ID which I will cover why in the "Podman auto-update" section.
+Podman has the ability to generate the unit files for us which is probably a relief as it makes life incredibly comfortable. Criteria is that it outputs the generated units into a file using the container's name or ID. In this example I will go for the ID which I will cover why in the `Podman auto-update` section.
 ```
 $ podman generate systemd --files --new admiring_franklin                                                                                                                 
 /home/yaltb/container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.service   
@@ -409,11 +409,11 @@ WantedBy=multi-user.target default.target
 
 ```
 Breaking all that down:
-* `podman generate systemd` which will generate systemd units
+* `podman generate systemd` which will generate `systemd` units
 * ` --files` which will output the generated unit to a file as `container-[$CONTAINERNAME]
-* ` --new admiring_franklin` will allow systemd to create and run updated images followed by the container's name.
+* ` --new admiring_franklin` will allow `systemd` to create and run updated images followed by the container's name.
 
-This unit file can be added to systemd, enabled and pretty much it. Podman and systemd will take care of everything following like starting the container on boot and updating it. When running a rootless podman session:
+This unit file can be added to `systemd`, enabled and pretty much it. Podman and systemd will take care of everything following like starting the container on boot and updating it. When running a rootless Podman session:
 ```
 $ mv container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.service ~/.config/systemd/user/
 $ systemctl --user enable --now container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.service
@@ -740,9 +740,9 @@ $ podman inspect admiring_franklin
     }
 ]
 ```
-Podman inspect literally covers everything that container is running with. Labels, mounts, volumes, exposed ports etc. Incredibly usefull for debugging and of course the output can be filtered. For more visit the `podman inspect` man page.
+`Podman inspect` literally covers everything that container is running with. Labels, mounts, volumes, exposed ports etc. Extremely useful for debugging and of course the output can be filtered. For more visit the `podman inspect` man page.
 
-The next useful tool to check what is happening realtime inside a container is `podman logs` which will output the `stdout` of the container. This can cover errors, warrning or general output information from the application inside the container.
+The next useful tool to check what is happening real-time inside a container is `podman logs` which will output the `stdout` of the container. This can cover errors, warnings or general output information from the application inside the container.
 ```
 $ podman logs admiring_franklin
 [Thu Feb 04 20:30:48.909589 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module actions_module from /usr/lib64/apache2-prefork/mod_actions.so
@@ -774,12 +774,15 @@ $ podman logs admiring_franklin
 [Thu Feb 04 20:30:49.430178 2021] [core:info] [pid 10] AH00545: MaxRequestsPerChild is deprecated, use MaxConnectionsPerChild instead.
 AH00558: httpd-prefork: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1. Set the 'ServerName' directive globally to suppress this message
 ``` 
-This can output a lot of information and it is rolling with the container's lifecycle. To monitor the logs realtime as they come in - such as one would do it with `tail -f` - you can with `podman logs -f` followed by the container's name or ID.
+This can output a lot of information and it is rolling with the container's life cycle. To monitor the logs real-time as they come in - such as one would do with `tail -f` - you can do that with `podman logs -f` followed by the container's name or ID.
  
 ### Persistent data
-Containers are not able to store persistent data. If we need an application to store data between restarts and updates we need to either attach a `volume` or `mount` storage space outside of the container from the host system.
+
+Containers are not able to store persistent data. If you need an application to store data between restarts and updates you need to either attach a `volume` or `mount` storage space outside of the container from the host system.
+
 #### Mounts
-Are basically can be anything. A file, a folder stored anywhere on the host system. This is not a storage space that is managed by podman and can be accessed from the host system and from within the container. Creating a container with bind mount:
+
+Are basically can be anything, a file, a folder stored anywhere on the host system. This is not a storage space that is managed by Podman and can be accessed from the host system and from within the container as well. Creating a container with bind mount:
 
 ```
 $ podman run -it --name tw --mount type=bind,source=./binder,target=/mnt opensuse/tumbleweed /bin/bash                                                              
@@ -813,12 +816,12 @@ drwxr-xr-x 1 apinter users 32 Feb  5 17:58 ..
 ```
 Breaking it down:
 * `podman run -it --name tw` will start a container in interactive mode and open a terminal (tty) inside the container which is named `tw`,
-* `--mount type=bind,source=./binder,target=/mnt` the `--mount` flag will tell podman that we want to mount something from the host filesystem, the type is set to `bind` then with `source` set the path to the folder and with `target` set the path within the container where to mount it,
+* `--mount type=bind,source=./binder,target=/mnt` the `--mount` flag will tell Podman that we want to mount something from the host file system, the type is set to `bind` then with `source` set the path to the folder and with `target` set the path within the container where to mount it,
 * `opensuse/tumbleweed /bin/bash` defining the image - in this case openSUSE Tumbleweed - and what to run which will be the `bash` shell,
-* Following that is a little proof-of-concpet that the created file from within the container stay on the host filesystem after exiting.
+* Following that is a little proof-of-concept that the created file from within the container stay on the host file system after exiting.
 
 #### Volumes
-Volumes, unlike bind mounts are managed by Podman and this is the prefferred way of having a persistent storage space attached to a container. If running a rootfull session the volume will be stored under `/var/lib/containers`, while rootless volumes will be stored under `~/.local/share/containers/storage`. To be able to attach volumes first need to create them with `podman volume create` and volumes can be listed with `podman volume list`. The volumes can be named and can have labels. 
+Volumes, unlike bind mounts are managed by Podman and this is the preferred way of having a persistent storage space attached to a container. If running a rootfull session the volume will be stored under `/var/lib/containers`, while rootless volumes will be stored under `~/.local/share/containers/storage`. To be able to attach volumes first need to create them with `podman volume create` and volumes can be listed with `podman volume list`. The volumes can be named and can have labels for meta information. 
 ```
 $ podman volume create testvol                                                                                               
 testvol
@@ -885,24 +888,24 @@ a message for the future
 # 1a203240e9d7:/mnt # exit
 exit
 ```
-Breaking it down (most of the command is identical to the one used in `bind mount` so to keep it short will focus only the differences):
+Breaking it down (the command is almost identical to the one used in `bind mount` so to keep it short will focus only the differences):
 * `--mount type=volume,source=testvol,target=/mnt` just like with `bind mounts` need to use the `--mount` flag, but the `type` will be `volume` and the `source` does not need the whole path just the name/id of the `volume`. Upon the creation of the volume if a name is not set a random one will be generated
 * This is being followed by a proof-of-concept in which I created a container, mounted the volume, wrote a file and stored it in the volume then destroyed the container. Recreated it with the same command and `volume` and read out the files previously created inside the already destroyed container.
 For more visit the `podman volume` man page.
 
 ### Updating containers
-Can go about this a few different ways like pulling a container, launching it, mounting the neccessary shares and config files and starting it on a different exposed port than the one we're planning to "update". Once this is done, tested and works fine can just change the route to point to this updated container. Me being a lazy DevOps engineer I don't like this option so let's visit `podman auto-update`.
+Can go about this a few different ways like pulling a container, launching it, mounting the necessary shares and config files and starting it on a different exposed port than the one we're planning to "update". Once this is done, tested and works fine can just change the route to point to this updated container. Me being a lazy DevOps engineer I don't like this option so let's visit `podman auto-update`.
 
 #### Podman auto-update
 
 Before we go any further there are few things to make sure are set correctly on our container:
 * there is no `--restart=always` flag present,
-* the container is managed by systemd,
-* the systemd unit has been generated by the container's ID not by it's name,
-* the systemd unit has been generated with the `--new` flag.
+* the container is managed by `systemd`,
+* the `systemd` unit has been generated by the container's ID not by it's name,
+* the `systemd` unit has been generated with the `--new` flag.
 
-Podman's other important feature is the automatic updates of containers without the need of even putting containers in pods or adding a watchtower service. This is done by adding the ```--label io.containers.autoupdate=image``` label during container creation.    
-This to be followed by generating systemd units for the container: ```podman generate systemd --new --files [container ID or name]```. Once this is ready and the unit file is under the corresponding systemd folder - depending on how podman is used w/ root or rootless - the container unit to be started. Following this the ```podman auto-update``` command can update every container with changed images.
+Podman's other important feature is the automatic updates of containers without the need of even putting containers in pods or adding a Watchtower service. This is done by adding the `--label io.containers.autoupdate=image` label during container creation.    
+This to be followed by generating `systemd` units for the container: `podman generate systemd --new --files [container ID or name]`. Once this is ready and the unit file is under the corresponding `systemd` folder - depending on how podman is used, rootfull or rootless - the container unit to be started. Following this the `podman auto-update` command can update every container with changed images.
 
 #### Podman updater script
 Got a little shell script that runs every day. This creates fresh builds of custom containers, pushes them to a private registry, pulls certain images and updates every container. This ran by a service unit that is triggered by a timer. 
@@ -931,7 +934,7 @@ build_db;
 auto_update;
 ```
 ## What's next
-Podman is a huge topic and already wrote a lot, but covered just very little of it so this will be probably something ongoing what I'm going to do. Probably visit networking, building custom containers maybe CI related topics.
+Podman is a huge topic and this post is already fairly long, but covered just very little of it so this will be probably something ongoing what I'm going to do. Probably visit networking, building custom containers maybe CI related topics.
 
 ## References
 I strongly suggest checking out the man pages of podman which provides a lot of information straight from the terminal. Also the following articles will help a lot on your podman journey:
