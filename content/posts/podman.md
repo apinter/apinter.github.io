@@ -818,9 +818,77 @@ Breaking it down:
 * Following that is a little proof-of-concpet that the created file from within the container stay on the host filesystem after exiting.
 
 #### Volumes
-Volumes, unlike bind mounts are managed by Podman and this is the prefferred way of having a persistent storage space attached to a container. If running a rootfull session the volume will be stored under `/var/lib/containers`, while rootless volumes will be stored under `~/.local/share/containers/storage`.
-
-
+Volumes, unlike bind mounts are managed by Podman and this is the prefferred way of having a persistent storage space attached to a container. If running a rootfull session the volume will be stored under `/var/lib/containers`, while rootless volumes will be stored under `~/.local/share/containers/storage`. To be able to attach volumes first need to create them with `podman volume create` and volumes can be listed with `podman volume list`. The volumes can be named and can have labels. 
+```
+$ podman volume create testvol                                                                                               
+testvol
+$ podman volume list                                                                                                        
+DRIVER      VOLUME NAME
+local       2508530e4332a17683c91aabd18e310607ac57b418da21900e72589c7285ed6f
+local       49ad9d0c48db6b8b58a5434de01f2a1b0e2e29fef5ed4b8cf6f85cd11162e985
+local       4e79dd89718157538f394e085021800e9f76720f45fed7763793b9cbd2092e4e
+local       6c62ee3bc47ad16086cbc772e3dcb358229b2c56b1055167291d5a93bb2f9b4c
+local       81d45f6f954fbb85fb4058394b5415c352b05358fc5ed2ae0d05b8ddb885d8d2
+local       90d034f570fc7a8b2cb5592cd47a1183c24ff92b2c200e4a8e3a91ab5a70f1ed
+local       a297bfa38aecb84775bcfd764dbdc1f885ba0c2d93cdf0ff9bc1e957de6fcef4
+local       a6d423add657f0e5ad4ecb5d9c643d2df1ac3708ed433cf857a35b5d2879707a
+local       c86360b3e3d6b0a0cdc60cf3cb4504a267933d154dae282a7caf760c7b599cdf
+local       f6aec4ec8449c00c5c8f340634571f96befdda2f5c218fb93f2ee4bfb436154e
+local       testvol
+```
+Now mounting the created volume inside a container:
+```
+$ podman run -it --name tw --mount type=volume,source=testvol,target=/mnt opensuse/tumbleweed /bin/bash                                                             
+# 03b1eb2c4b48:/ # df -h
+Filesystem           Size  Used Avail Use% Mounted on
+fuse-overlayfs       231G   36G  195G  16% /
+tmpfs                 64M     0   64M   0% /dev
+tmpfs                4.0M     0  4.0M   0% /sys/fs/cgroup
+/dev/mapper/cr_root  231G   36G  195G  16% /mnt
+tmpfs                782M  374M  408M  48% /etc/hosts
+shm                   63M     0   63M   0% /dev/shm
+devtmpfs             3.9G     0  3.9G   0% /dev/tty
+tmpfs                3.9G     0  3.9G   0% /sys/kernel
+tmpfs                3.9G     0  3.9G   0% /proc/acpi
+tmpfs                3.9G     0  3.9G   0% /proc/scsi
+tmpfs                3.9G     0  3.9G   0% /sys/firmware
+tmpfs                3.9G     0  3.9G   0% /sys/dev
+# 03b1eb2c4b48:/ # cd /mnt 
+# 03b1eb2c4b48:/mnt # ls
+# 03b1eb2c4b48:/mnt # echo "a message for the future">> testing
+# 03b1eb2c4b48:/mnt # ls
+testing
+# 03b1eb2c4b48:/mnt # exit
+exit
+$ podman rm tw                                                                                                                                                      
+03b1eb2c4b48d4badc17dfd8f25430afa2e5a32bb10f32e982a4deb86488f6de
+$ podman run -it --name tw --mount type=volume,source=testvol,target=/mnt opensuse/tumbleweed /bin/bash                                                             
+# 1a203240e9d7:/ # df -h
+Filesystem           Size  Used Avail Use% Mounted on
+fuse-overlayfs       231G   36G  195G  16% /
+tmpfs                 64M     0   64M   0% /dev
+tmpfs                4.0M     0  4.0M   0% /sys/fs/cgroup
+/dev/mapper/cr_root  231G   36G  195G  16% /mnt
+tmpfs                782M  374M  408M  48% /etc/hosts
+shm                   63M     0   63M   0% /dev/shm
+devtmpfs             3.9G     0  3.9G   0% /dev/tty
+tmpfs                3.9G     0  3.9G   0% /sys/kernel
+tmpfs                3.9G     0  3.9G   0% /proc/acpi
+tmpfs                3.9G     0  3.9G   0% /proc/scsi
+tmpfs                3.9G     0  3.9G   0% /sys/firmware
+tmpfs                3.9G     0  3.9G   0% /sys/dev
+# 1a203240e9d7:/ # cd /mnt/
+# 1a203240e9d7:/mnt # ls
+testing
+# 1a203240e9d7:/mnt # cat testing
+a message for the future
+# 1a203240e9d7:/mnt # exit
+exit
+```
+Breaking it down (most of the command is identical to the one used in `bind mount` so to keep it short will focus only the differences):
+* `--mount type=volume,source=testvol,target=/mnt` just like with `bind mounts` need to use the `--mount` flag, but the `type` will be `volume` and the `source` does not need the whole path just the name/id of the `volume`. Upon the creation of the volume if a name is not set a random one will be generated
+* This is being followed by a proof-of-concept in which I created a container, mounted the volume, wrote a file and stored it in the volume then destroyed the container. Recreated it with the same command and `volume` and read out the files previously created inside the already destroyed container.
+For more visit the `podman volume` man page.
 
 ### Updating containers
 Can go about this a few different ways like pulling a container, launching it, mounting the neccessary shares and config files and starting it on a different exposed port than the one we're planning to "update". Once this is done, tested and works fine can just change the route to point to this updated container. Me being a lazy DevOps engineer I don't like this option so let's visit `podman auto-update`.
@@ -837,7 +905,7 @@ Podman's other important feature is the automatic updates of containers without 
 This to be followed by generating systemd units for the container: ```podman generate systemd --new --files [container ID or name]```. Once this is ready and the unit file is under the corresponding systemd folder - depending on how podman is used w/ root or rootless - the container unit to be started. Following this the ```podman auto-update``` command can update every container with changed images.
 
 #### Podman updater script
-We're shipping a script that every 2 and 4am runs, pulls the images and updates every container. This ran by a service unit that is triggered by a timer. !!! THIS MIGHT CHANGE LATER !!!!
+Got a little shell script that runs every day. This creates fresh builds of custom containers, pushes them to a private registry, pulls certain images and updates every container. This ran by a service unit that is triggered by a timer. 
 ``` bash
 #!/bin/bash
 
@@ -853,12 +921,6 @@ podman build -t mariadb-sx5 .
 podman push --authfile /root/.auth/auth.json mariadb-sx5 registry.s8i.io/mariadb-sx5 
 }
 
-build_tr(){
-cd /home/podman_vol/dev/transmission; \
-podman build -t transmission-app .
-podman push --authfile /root/.auth/auth.json transmission-app registry.s8i.io/transmission-app
-}
-
 auto_update(){
 podman auto-update
 }
@@ -866,7 +928,17 @@ podman auto-update
 pull;
 build_www;
 build_db;
-build_tr;
 auto_update;
 ```
+## What's next
+Podman is a huge topic and already wrote a lot, but covered just very little of it so this will be probably something ongoing what I'm going to do. Probably visit networking, building custom containers maybe CI related topics.
 
+## References
+I strongly suggest checking out the man pages of podman which provides a lot of information straight from the terminal. Also the following articles will help a lot on your podman journey:
+* https://www.redhat.com/sysadmin/compose-podman-pods
+* https://www.redhat.com/sysadmin/rootless-podman-makes-sense
+* https://www.redhat.com/sysadmin/behind-scenes-podman
+* https://www.redhat.com/sysadmin/user-flag-rootless-containers
+* https://www.redhat.com/en/blog/understanding-root-inside-and-outside-container
+* https://developers.redhat.com/blog/2019/01/15/podman-managing-containers-pods/
+* https://developers.redhat.com/blog/2019/04/24/how-to-run-systemd-in-a-container/
