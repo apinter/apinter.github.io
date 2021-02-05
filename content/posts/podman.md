@@ -1,5 +1,5 @@
 ---
-title: "Podman"
+title: "Podman quick start"
 date: 2021-02-03T13:14:50+07:00
 descriptiom: General introduction to Podman 
 tags: ["Podman","container","automation"]
@@ -149,7 +149,7 @@ Storing signatures
 ### Starting a container
 
 #### Rootfull or rootless
-As Podman is daemonless running containers doesn't require running them with root, but can be started with a user as well. Granted, rootless containers will have no access to networking and can't use priviliged ports, but it is a great way to keep the system secure. Rootfull containers are recommended for running ceratin applications that require access over priviliged ports like an nginx reverse proxy.
+As Podman is daemonless running containers doesn't require running them with root, but can be started with a user as well. Granted, rootless containers will have no access to networking and can't use priviliged ports, but it is a great way to keep the system secure. For instance if an application escapes the container ran as a user it will be able to cause less damage and would have limited access to the system than if it would be ran as root. Rootfull containers are recommended for running applications that require access over priviliged ports like a public facing nginx reverse proxy. Even in that case there could be some rules implemented in the firewall that forwards requests, but that's a different story.
 
 Starting a container that runs in the background and exposing port 8000 to be accessible from the outside:
 ```
@@ -224,37 +224,576 @@ To list all available images use `podman images`. This will provide a list of ev
 ### Podman Pods
 The pod concept has been introduced in Kuberentes and Docker users usually don't even think of the possibility or benefits to run pods in a local runtime or a development environment. Pods are great if for example you need a database (db) container that you don't want to bind it to a routable network. In comes the pod. Instead of binding the db to a routable network one can bind it to `localhost` therefore other containers within the pod can connect to it using `localhost` as they share the network name space. Another use case can be to group containers in pods. 
 Every pod has an 'infra' container that functions as the namespace holder, stores data on port bindings, cgroup-parent values, and kernel namespaces are all assigned to the “infra” container. Once the pod is created these values can not be changed. The pod can also allows one to start, stop, pause multiple containers at once just by doing the same, but instead by container the commands can be executed by pods resuting of a desired effect, but faster and a lot more comfortably.   
-For details on pod related cli commands visit the `podman pod` man page.
+For details on pod related cli commands visit the `podman pod` man page. 
 
 #### Pod creation
 
-We create the pods by naming them - duh - and exposing the required ports. This way we're not required to setup containers individually in terms of publishing ports just adding the containers to them.   
+You can create the pods by naming them and exposing the required ports. This way we're not required to setup containers individually in terms of publishing ports just adding the containers to them.   
+```
+$ podman pod create -n yaltb -p 8000:8000                                                                        
+7244e77552d9bee402383a37906813b4194cef89c930c87d4d590d92fce827b0
+$ podman pod list                                                                            
+POD ID        NAME    STATUS   CREATED        INFRA ID      # OF CONTAINERS
+7244e77552d9  yaltb   Created  8 seconds ago  4a696258e500  1
+```
+A little breakdown here:
+* `-n` or `--name` will allow to set the name of the pod.
+* `-p` or `--publish` will expose the desired port(s) that will be used to access container(s) from outside the host.
+* `podman pod list` is listing the available pods with their basic information.
+For more information visit the `podman pod create` man page.
 
-#### Pod creation:
+#### Adding containers to a pod
+
+Pods can hold as many containers as you want. To add containers just set the `--pod` flag when creating the container.
 ```
-podman pod create -n monitor -p 9090:9090 -p 3000:3000
-podman pod create --name sx5 -p 3306:3306 -p 8888:80 -p 8843:443 -p 6379:6379 -p 9980:9980
+$ podman run -d --pod yaltb nginx                                                                                                                                         
+6645234da2d18f60632fdcfed3a7825a81649c606dfeba70fec11b9d5479174d
+$ podman pod list                                                                                                                                                         
+POD ID        NAME    STATUS   CREATED         INFRA ID      # OF CONTAINERS
+7244e77552d9  yaltb   Running  10 minutes ago  4a696258e500  2
+$ podman ps -a --pod                                                                                                                                                      
+CONTAINER ID  IMAGE                 COMMAND          CREATED         STATUS             PORTS                   NAMES               POD ID        PODNAME
+6645234da2d1  nginx                 /usr/sbin/nginx  15 seconds ago  Up 15 seconds ago  0.0.0.0:8000->8000/tcp  clever_williamson   7244e77552d9  yaltb
+4a696258e500  k8s.gcr.io/pause:3.2                   10 minutes ago  Up 15 seconds ago  0.0.0.0:8000->8000/tcp  7244e77552d9-infra  7244e77552d9  yaltb
+```
+Breaking it down:
+* `podman run -d --pod yaltb nginx` will create and add an nginx container to the previously create `yaltb` pod. The pod has been defined by the `--pod` flag followed by the name of the pod. Notice that we didn't expose ports as they are already exposed in the created port. **Important:** network can't be configured when it is shared with a pod therefore you need to expose/publish ports upon pod creation.
+* `podman ps -a --pod` will list every container that is running in pods.
+
+#### Managing containers in pods
+
+Contaiers in pods can be managed individually regardless they're running within a pod. Do check above for the options for managing containers. This means that if you need to remove a container from a pod 
+
+#### Exporting pods
+Pods can be exported with `podman generate` command. This would allow one to take the exported pod and deploy it the same way it is deployed on the local runtime on a different Podman server or even on a Kubernetes cluster.
+```
+$ podman generate kube yaltb                                                                                                                                              
+# Generation of Kubernetes YAML is still under development!
+#
+# Save the output of this file and use kubectl create -f to import
+# it into Kubernetes.
+#
+# Created with podman-2.2.1
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: "2021-02-05T05:28:08Z"
+  labels:
+    app: yaltb
+  name: yaltb
+spec:
+  containers:
+  - command:
+    - /usr/sbin/nginx
+    env:
+    - name: PATH
+      value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    - name: TERM
+      value: xterm
+    - name: container
+      value: podman
+    - name: HOSTNAME
+      value: yaltb
+    image: nginx
+    name: condescendinggalois
+    ports:
+    - containerPort: 8000
+      hostPort: 8000
+      protocol: TCP
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: true
+      capabilities: {}
+      privileged: false
+      readOnlyRootFilesystem: false
+      seLinuxOptions: {}
+    workingDir: /
+  - command:
+    - /usr/sbin/nginx
+    env:
+    - name: PATH
+      value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    - name: TERM
+      value: xterm
+    - name: container
+      value: podman
+    - name: HOSTNAME
+      value: yaltb
+    image: nginx
+    name: cleverwilliamson
+    resources: {}
+    securityContext:
+      allowPrivilegeEscalation: true
+      capabilities: {}
+      privileged: false
+      readOnlyRootFilesystem: false
+      seLinuxOptions: {}
+    workingDir: /
+  restartPolicy: Never
+status: {}
+---
+metadata:
+  creationTimestamp: null
+spec: {}
+status:
+  loadBalancer: {}
+
+$ podman pod stop yaltb                                                                                                                                                   
+7244e77552d9bee402383a37906813b4194cef89c930c87d4d590d92fce827b0
+$ podman pod rm yaltb                                                                                                                                                     
+7244e77552d9bee402383a37906813b4194cef89c930c87d4d590d92fce827b0
+
+$ podman play kube yaltb_pod.yml                                                                                                                                          
+Pod:
+ce21bc0689409795800d7e0f699f4503b6be8f7f81bcc4fabc33e5da32bba164
+Containers:
+13e9f16b1aaaa7be1f19c87c21d99deaca3862d97293b98c20bf792d72738911
+c5f8e4364b0e0caca047b3797ffc0aaf268460aee9249efc4d46259c4693eddd
+
+[~] podman pod ps                                                                                                                                                           
+POD ID        NAME    STATUS    CREATED         INFRA ID      # OF CONTAINERS
+ce21bc068940  yaltb   Degraded  11 seconds ago  c78bebfb3cc3  3
+[~] podman ps -a --pod                                                                                                                                                      
+CONTAINER ID  IMAGE                 COMMAND          CREATED         STATUS                     PORTS                   NAMES                      POD ID        PODNAME
+13e9f16b1aaa  nginx                 /usr/sbin/nginx  19 seconds ago  Up 19 seconds ago          0.0.0.0:8000->8000/tcp  yaltb-condescendinggalois  ce21bc068940  yaltb
+c5f8e4364b0e  nginx                 /usr/sbin/nginx  19 seconds ago  Exited (1) 16 seconds ago  0.0.0.0:8000->8000/tcp  yaltb-cleverwilliamson     ce21bc068940  yaltb
+c78bebfb3cc3  k8s.gcr.io/pause:3.2                   19 seconds ago  Up 19 seconds ago          0.0.0.0:8000->8000/tcp  ce21bc068940-infra         ce21bc068940  yaltb
+[~] podman ps  --pod                                                                                                                                                        
+CONTAINER ID  IMAGE                 COMMAND          CREATED         STATUS             PORTS                   NAMES                      POD ID        PODNAME
+13e9f16b1aaa  nginx                 /usr/sbin/nginx  30 seconds ago  Up 30 seconds ago  0.0.0.0:8000->8000/tcp  yaltb-condescendinggalois  ce21bc068940  yaltb
+c78bebfb3cc3  k8s.gcr.io/pause:3.2                   30 seconds ago  Up 30 seconds ago  0.0.0.0:8000->8000/tcp  ce21bc068940-infra         ce21bc068940  yaltb
+ 
+```
+Lets break down the above:
+* `podman generate kube yaltb` will generated a `YAML` file which one can take to another server and `play` it providing the same exact pod that it is running on the local runtime.
+* `podman pod stop yaltb` will stop the `yaltb` pod and all the containers in it.
+* `podman pod rm yaltbh` will delete the `yaltb` pod.
+* `podman play kube yaltb_pod.yml` will start the exported pods based on the `YAML` file. The pod and the containers in the pod listed in the following commands.
+
+### Podman and systemd
+
+Podman has a fantastic integration with `systemd`. I believe at this point the users are even able to run systemd **within** a container which makes perfect sense. Why would we have to use anything different inside a container than we already got used to outside of a container. Anyhow we nt covering this, but managing containers with systemd. 
+As we deploy more and more containers managing them using the podman cli tool only may quickly become burdensome. It is much easier to manage the pods and containers with systemd for example to restart, stop, or to start them. Using systemd will also enable us to utilize "podman auto-update" for updating the containers.
+
+#### Generating a systemd unit
+
+Podman has the ability to generate the unit files for us which is probably a relief as it makes life incredibly comfortable. Criteria is that it outputs the generated units into a file using the container's name or ID. In this example I will go for the ID which I will cover why in the "Podman auto-update" section.
+```
+$ podman generate systemd --files --new admiring_franklin                                                                                                                 
+/home/yaltb/container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.service   
+
+$ cat container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.service                                                                                  
+# container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.service
+# autogenerated by Podman 2.2.1
+# Fri Feb  5 12:52:43 WIB 2021
+
+[Unit]
+Description=Podman container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.service
+Documentation=man:podman-generate-systemd(1)
+Wants=network.target
+After=network-online.target
+
+[Service]
+Environment=PODMAN_SYSTEMD_UNIT=%n
+Restart=on-failure
+ExecStartPre=/bin/rm -f %t/container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.pid %t/container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.ctr-id
+ExecStart=/usr/bin/podman run --conmon-pidfile %t/container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.pid --cidfile %t/container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.ctr-id --cgroups=no-conmon -d -p 8000:8000 nginx
+ExecStop=/usr/bin/podman stop --ignore --cidfile %t/container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.ctr-id -t 10
+ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.ctr-id
+PIDFile=%t/container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.pid
+KillMode=none
+Type=forking
+
+[Install]
+WantedBy=multi-user.target default.target
+
+```
+Breaking all that down:
+* `podman generate systemd` which will generate systemd units
+* ` --files` which will output the generated unit to a file as `container-[$CONTAINERNAME]
+* ` --new admiring_franklin` will allow systemd to create and run updated images followed by the container's name.
+
+This unit file can be added to systemd, enabled and pretty much it. Podman and systemd will take care of everything following like starting the container on boot and updating it. When running a rootless podman session:
+```
+$ mv container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.service ~/.config/systemd/user/
+$ systemctl --user enable --now container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.service
 ```
 
-#### Adding containers to the pods:
+### Podman inspect and logs
 
-##### Monitoring:
+To reveal the parameters a container or a pod has been created with we can use the `podman inspect` command followed by the name/id of the container or pod.
 ```
-# podman run -d --pod monitor --name prometheus --label io.containers.autoupdate=image -v /home/podman_vol/prometheus/etc-prometheus/prometheus.yml:/etc/prometheus/prometheus.yml prom/prometheus
-# podman run -d --pod monitor --label io.containers.autoupdate=image --mount type=bind,source=/home/podman_vol/grafana/var-lib-grafana,target=/var/lib/grafana --name grafana grafana/grafana:latest
+$ podman inspect admiring_franklin                                                                                                                                        
+[
+    {
+        "Id": "aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7",
+        "Created": "2021-02-05T12:52:23.83123341+07:00",
+        "Path": "/usr/local/bin/entrypoint.sh",
+        "Args": [
+            "/usr/sbin/nginx"
+        ],
+        "State": {
+            "OciVersion": "1.0.2-dev",
+            "Status": "running",
+            "Running": true,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 26725,
+            "ConmonPid": 26714,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2021-02-05T12:52:24.009065815+07:00",
+            "FinishedAt": "0001-01-01T00:00:00Z",
+            "Healthcheck": {
+                "Status": "",
+                "FailingStreak": 0,
+                "Log": null
+            }
+        },
+        "Image": "36fa073c57cc5251ac2df80de6a2e052dad9a10d6ffc9a9e65ba6eaa0ddea6ff",
+        "ImageName": "nginx",
+        "Rootfs": "",
+        "Pod": "",
+        "ResolvConfPath": "/run/user/1000/containers/overlay-containers/aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7/userdata/resolv.conf",
+        "HostnamePath": "/run/user/1000/containers/overlay-containers/aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7/userdata/hostname",
+        "HostsPath": "/run/user/1000/containers/overlay-containers/aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7/userdata/hosts",
+        "StaticDir": "/home/apinter/.local/share/containers/storage/overlay-containers/aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7/userdata",
+        "OCIConfigPath": "/home/apinter/.local/share/containers/storage/overlay-containers/aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7/userdata/config.json",
+        "OCIRuntime": "runc",
+        "LogPath": "/home/apinter/.local/share/containers/storage/overlay-containers/aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7/userdata/ctr.log",
+        "LogTag": "",
+        "ConmonPidFile": "/run/user/1000/containers/overlay-containers/aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7/userdata/conmon.pid",
+        "Name": "admiring_franklin",
+        "RestartCount": 0,
+        "Driver": "overlay",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "",
+        "EffectiveCaps": [
+            "CAP_AUDIT_WRITE",
+            "CAP_CHOWN",
+            "CAP_DAC_OVERRIDE",
+            "CAP_FOWNER",
+            "CAP_FSETID",
+            "CAP_KILL",
+            "CAP_MKNOD",
+            "CAP_NET_BIND_SERVICE",
+            "CAP_NET_RAW",
+            "CAP_SETFCAP",
+            "CAP_SETGID",
+            "CAP_SETPCAP",
+            "CAP_SETUID",
+            "CAP_SYS_CHROOT"
+        ],
+        "BoundingCaps": [
+            "CAP_AUDIT_WRITE",
+            "CAP_CHOWN",
+            "CAP_DAC_OVERRIDE",
+            "CAP_FOWNER",
+            "CAP_FSETID",
+            "CAP_KILL",
+            "CAP_MKNOD",
+            "CAP_NET_BIND_SERVICE",
+            "CAP_NET_RAW",
+            "CAP_SETFCAP",
+            "CAP_SETGID",
+            "CAP_SETPCAP",
+            "CAP_SETUID",
+            "CAP_SYS_CHROOT"
+        ],
+        "ExecIDs": [],
+        "GraphDriver": {
+            "Name": "overlay",
+            "Data": {
+                "LowerDir": "/home/apinter/.local/share/containers/storage/overlay/9f76177964d37dd2b6b0a0d675d83279c746568e764856d39cbcd9124196d776/diff:/home/apinter/.local/share/containers/storage/overlay/b81706afabe1f2b78cf2592b4f177f245563e5a33819f4e04a9edff9e0ddbbd8/diff",
+                "MergedDir": "/home/apinter/.local/share/containers/storage/overlay/4eda62ca4ff798cc5e7361e8ea0f9126aa12e91e676036245d90b3e0d790b632/merged",
+                "UpperDir": "/home/apinter/.local/share/containers/storage/overlay/4eda62ca4ff798cc5e7361e8ea0f9126aa12e91e676036245d90b3e0d790b632/diff",
+                "WorkDir": "/home/apinter/.local/share/containers/storage/overlay/4eda62ca4ff798cc5e7361e8ea0f9126aa12e91e676036245d90b3e0d790b632/work"
+            }
+        },
+        "Mounts": [
+            {
+                "Type": "volume",
+                "Name": "c86360b3e3d6b0a0cdc60cf3cb4504a267933d154dae282a7caf760c7b599cdf",
+                "Source": "/home/apinter/.local/share/containers/storage/volumes/c86360b3e3d6b0a0cdc60cf3cb4504a267933d154dae282a7caf760c7b599cdf/_data",
+                "Destination": "/data",
+                "Driver": "local",
+                "Mode": "",
+                "Options": [
+                    "nodev",
+                    "exec",
+                    "nosuid",
+                    "rbind"
+                ],
+                "RW": true,
+                "Propagation": "rprivate"
+            }
+        ],
+        "Dependencies": [],
+        "NetworkSettings": {
+            "EndpointID": "",
+            "Gateway": "",
+            "IPAddress": "",
+            "IPPrefixLen": 0,
+            "IPv6Gateway": "",
+            "GlobalIPv6Address": "",
+            "GlobalIPv6PrefixLen": 0,
+            "MacAddress": "",
+            "Bridge": "",
+            "SandboxID": "",
+            "HairpinMode": false,
+            "LinkLocalIPv6Address": "",
+            "LinkLocalIPv6PrefixLen": 0,
+            "Ports": {
+                "8000/tcp": [
+                    {
+                        "HostIp": "",
+                        "HostPort": "8000"
+                    }
+                ]
+            },
+            "SandboxKey": "/run/user/1000/netns/cni-ca08b508-01ec-9f12-554f-109725a54e4f"
+        },
+        "ExitCommand": [
+            "/usr/bin/podman",
+            "--root",
+            "/home/apinter/.local/share/containers/storage",
+            "--runroot",
+            "/run/user/1000/containers",
+            "--log-level",
+            "error",
+            "--cgroup-manager",
+            "cgroupfs",
+            "--tmpdir",
+            "/run/user/1000/libpod/tmp",
+            "--runtime",
+            "runc",
+            "--storage-driver",
+            "overlay",
+            "--storage-opt",
+            "overlay.mount_program=/usr/bin/fuse-overlayfs",
+            "--events-backend",
+            "journald",
+            "container",
+            "cleanup",
+            "aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7"
+        ],
+        "Namespace": "",
+        "IsInfra": false,
+        "Config": {
+            "Hostname": "aaef566e5009",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "TERM=xterm",
+                "container=podman",
+                "HOSTNAME=aaef566e5009",
+                "HOME=/root"
+            ],
+            "Cmd": [
+                "/usr/sbin/nginx"
+            ],
+            "Image": "nginx",
+            "Volumes": null,
+            "WorkingDir": "/",
+            "Entrypoint": "/usr/local/bin/entrypoint.sh",
+            "OnBuild": null,
+            "Labels": {
+                "org.openbuildservice.disturl": "obs://build.opensuse.org/openSUSE:Factory/images/d720a7068b306d15952c962f20a9524c-opensuse-nginx-image",
+                "org.opencontainers.image.created": "2021-01-30T17:23:14.138895035Z",
+                "org.opencontainers.image.description": "Image containing nginx as web server.",
+                "org.opencontainers.image.title": "openSUSE nginx web server container",
+                "org.opencontainers.image.url": "https://www.opensuse.org/",
+                "org.opencontainers.image.vendor": "openSUSE Project",
+                "org.opencontainers.image.version": "1.19.6-8.919",
+                "org.opensuse.nginx.created": "2021-01-30T17:23:14.138895035Z",
+                "org.opensuse.nginx.description": "Image containing nginx as web server.",
+                "org.opensuse.nginx.disturl": "obs://build.opensuse.org/openSUSE:Factory/images/d720a7068b306d15952c962f20a9524c-opensuse-nginx-image",
+                "org.opensuse.nginx.reference": "registry.opensuse.org/opensuse/nginx:1.19.6-8.919",
+                "org.opensuse.nginx.title": "openSUSE nginx web server container",
+                "org.opensuse.nginx.version": "1.19.6-8.919",
+                "org.opensuse.reference": "registry.opensuse.org/opensuse/nginx:1.19.6-8.919",
+                "org.opensuse.tumbleweed.busybox.created": "2021-01-30T17:00:57.705148070Z",
+                "org.opensuse.tumbleweed.busybox.description": "Small image containing busybox.",
+                "org.opensuse.tumbleweed.busybox.disturl": "obs://build.opensuse.org/openSUSE:Factory/images/e1deab10410717d6b30d6ff1940e1777-tumbleweed-busybox-image",
+                "org.opensuse.tumbleweed.busybox.reference": "registry.opensuse.org/opensuse/busybox:1.32.1-14.1",
+                "org.opensuse.tumbleweed.busybox.title": "openSUSE Busybox Container",
+                "org.opensuse.tumbleweed.busybox.url": "https://www.opensuse.org/",
+                "org.opensuse.tumbleweed.busybox.vendor": "openSUSE Project",
+                "org.opensuse.tumbleweed.busybox.version": "1.32.1-14.1"
+            },
+            "Annotations": {
+                "io.container.manager": "libpod",
+                "io.kubernetes.cri-o.Created": "2021-02-05T12:52:23.83123341+07:00",
+                "io.kubernetes.cri-o.TTY": "false",
+                "io.podman.annotations.autoremove": "FALSE",
+                "io.podman.annotations.init": "FALSE",
+                "io.podman.annotations.privileged": "FALSE",
+                "io.podman.annotations.publish-all": "FALSE",
+                "org.opencontainers.image.stopSignal": "15"
+            },
+            "StopSignal": 15,
+            "CreateCommand": [
+                "podman",
+                "run",
+                "-d",
+                "-p",
+                "8000:8000",
+                "nginx"
+            ],
+            "Umask": "0022"
+        },
+        "HostConfig": {
+            "Binds": [
+                "c86360b3e3d6b0a0cdc60cf3cb4504a267933d154dae282a7caf760c7b599cdf:/data:rprivate,rw,nodev,exec,nosuid,rbind"
+            ],
+            "CgroupManager": "cgroupfs",
+            "CgroupMode": "host",
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "k8s-file",
+                "Config": null
+            },
+            "NetworkMode": "slirp4netns",
+            "PortBindings": {
+                "8000/tcp": [
+                    {
+                        "HostIp": "",
+                        "HostPort": "8000"
+                    }
+                ]
+            },
+            "RestartPolicy": {
+                "Name": "",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "CapAdd": [],
+            "CapDrop": [],
+            "Dns": [],
+            "DnsOptions": [],
+            "DnsSearch": [],
+            "ExtraHosts": [],
+            "GroupAdd": [],
+            "IpcMode": "private",
+            "Cgroup": "",
+            "Cgroups": "default",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "private",
+            "Privileged": false,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": false,
+            "SecurityOpt": [],
+            "Tmpfs": {},
+            "UTSMode": "private",
+            "UsernsMode": "",
+            "ShmSize": 65536000,
+            "Runtime": "oci",
+            "ConsoleSize": [
+                0,
+                0
+            ],
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 0,
+            "NanoCpus": 0,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": null,
+            "BlkioDeviceReadBps": null,
+            "BlkioDeviceWriteBps": null,
+            "BlkioDeviceReadIOps": null,
+            "BlkioDeviceWriteIOps": null,
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": [],
+            "DiskQuota": 0,
+            "KernelMemory": 0,
+            "MemoryReservation": 0,
+            "MemorySwap": 0,
+            "MemorySwappiness": 0,
+            "OomKillDisable": false,
+            "PidsLimit": 0,
+            "Ulimits": [],
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "CgroupConf": null
+        }
+    }
+]
 ```
-##### SX5:
-```
-# podman run -d --label io.containers.autoupdate=image --pod sx5 --name sx5-www --mount type=bind,source=/home/podman_vol/sx5/sx5_data,target=/home/sx5_data --mount type=bind,source=/home/podman_vol/sx5/www/sx5,target=/srv/www/htdocs/sx5 registry.s8i.io/sx5-www
-# podman run -t -d --pod sx5 --label io.containers.autoupdate=image -e 'domain=reno\\.s8i\\.io' -e 'username=apinter' -e 'password=t43heta@3861' --name collabora --restart always --cap-add MKNOD collabora/code
-# podman run -d --label io.containers.autoupdate=image --pod sx5 --name sx5-db --mount type=bind,source=/home/podman_vol/sx5/sql/var-lib-mysql,target=/var/lib/mysql registry.s8i.io/mariadb-sx5
-# podman run --label io.containers.autoupdate=image --pod sx5 --name redis -d redis
-```
+Podman inspect literally covers everything that container is running with. Labels, mounts, volumes, exposed ports etc. Incredibly usefull for debugging and of course the output can be filtered. For more visit the `podman inspect` man page.
 
-### Container registry
+The next useful tool to check what is happening realtime inside a container is `podman logs` which will output the `stdout` of the container. This can cover errors, warrning or general output information from the application inside the container.
+```
+$ podman logs admiring_franklin
+[Thu Feb 04 20:30:48.909589 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module actions_module from /usr/lib64/apache2-prefork/mod_actions.so
+[Thu Feb 04 20:30:48.928259 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module alias_module from /usr/lib64/apache2-prefork/mod_alias.so
+[Thu Feb 04 20:30:48.937031 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module auth_basic_module from /usr/lib64/apache2-prefork/mod_auth_basic.so
+[Thu Feb 04 20:30:48.938069 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module authn_core_module from /usr/lib64/apache2-prefork/mod_authn_core.so
+[Thu Feb 04 20:30:48.946344 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module authn_file_module from /usr/lib64/apache2-prefork/mod_authn_file.so
+[Thu Feb 04 20:30:48.956344 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module authz_host_module from /usr/lib64/apache2-prefork/mod_authz_host.so
+[Thu Feb 04 20:30:48.974215 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module authz_groupfile_module from /usr/lib64/apache2-prefork/mod_authz_groupfile.so
+[Thu Feb 04 20:30:48.990336 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module authz_core_module from /usr/lib64/apache2-prefork/mod_authz_core.so
+[Thu Feb 04 20:30:48.991396 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module authz_user_module from /usr/lib64/apache2-prefork/mod_authz_user.so
+[Thu Feb 04 20:30:48.992640 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module autoindex_module from /usr/lib64/apache2-prefork/mod_autoindex.so
+[Thu Feb 04 20:30:48.995014 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module cgi_module from /usr/lib64/apache2-prefork/mod_cgi.so
+[Thu Feb 04 20:30:48.996348 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module dir_module from /usr/lib64/apache2-prefork/mod_dir.so
+[Thu Feb 04 20:30:49.003103 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module env_module from /usr/lib64/apache2-prefork/mod_env.so
+[Thu Feb 04 20:30:49.003674 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module expires_module from /usr/lib64/apache2-prefork/mod_expires.so
+[Thu Feb 04 20:30:49.004606 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module include_module from /usr/lib64/apache2-prefork/mod_include.so
+[Thu Feb 04 20:30:49.005130 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module log_config_module from /usr/lib64/apache2-prefork/mod_log_config.so
+[Thu Feb 04 20:30:49.018137 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module mime_module from /usr/lib64/apache2-prefork/mod_mime.so
+[Thu Feb 04 20:30:49.028327 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module negotiation_module from /usr/lib64/apache2-prefork/mod_negotiation.so
+[Thu Feb 04 20:30:49.036869 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module setenvif_module from /usr/lib64/apache2-prefork/mod_setenvif.so
+[Thu Feb 04 20:30:49.078484 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module ssl_module from /usr/lib64/apache2-prefork/mod_ssl.so
+[Thu Feb 04 20:30:49.081221 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module socache_shmcb_module from /usr/lib64/apache2-prefork/mod_socache_shmcb.so
+[Thu Feb 04 20:30:49.081547 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module userdir_module from /usr/lib64/apache2-prefork/mod_userdir.so
+[Thu Feb 04 20:30:49.082180 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module reqtimeout_module from /usr/lib64/apache2-prefork/mod_reqtimeout.so
+[Thu Feb 04 20:30:49.084216 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module rewrite_module from /usr/lib64/apache2-prefork/mod_rewrite.so
+[Thu Feb 04 20:30:49.089975 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module headers_module from /usr/lib64/apache2-prefork/mod_headers.so
+[Thu Feb 04 20:30:49.135714 2021] [so:debug] [pid 10] mod_so.c(266): AH01575: loaded module php7_module from /usr/lib64/apache2/mod_php7.so
+[Thu Feb 04 20:30:49.430178 2021] [core:info] [pid 10] AH00545: MaxRequestsPerChild is deprecated, use MaxConnectionsPerChild instead.
+AH00558: httpd-prefork: Could not reliably determine the server's fully qualified domain name, using 127.0.1.1. Set the 'ServerName' directive globally to suppress this message
+``` 
+This can output a lot of information and it is rolling with the container's lifecycle. To monitor the logs realtime as they come in - such as one would do it with `tail -f` - you can with `podman logs -f` followed by the container's name or ID.
+ 
+### Persistent data
+
+#### Volume vs bind mount
+
+
+
+### Updating containers
+Can go about this a few different ways like pulling a container, launching it, mounting the neccessary shares and config files and starting it on a different exposed port than the one we're planning to "update". Once this is done, tested and works fine can just change the route to point to this updated container. Me being a lazy DevOps engineer I don't like this option so let's visit `podman auto-update`.
 
 #### Podman auto-update
-Podman's other important feature is the automatic updates of containers without the need of even putting containers in pods or adding a watchtower service. This is done by adding the ```--label io.containers.autoupdate=image```  during container creation.    
+
+Before we go any further there are few things to make sure are set correctly on our container:
+* there is no `--restart=always` flag present,
+* the container is managed by systemd,
+* the systemd unit has been generated by the container's ID not by it's name,
+* the systemd unit has been generated with the `--new` flag.
+
+Podman's other important feature is the automatic updates of containers without the need of even putting containers in pods or adding a watchtower service. This is done by adding the ```--label io.containers.autoupdate=image``` label during container creation.    
 This to be followed by generating systemd units for the container: ```podman generate systemd --new --files [container ID or name]```. Once this is ready and the unit file is under the corresponding systemd folder - depending on how podman is used w/ root or rootless - the container unit to be started. Following this the ```podman auto-update``` command can update every container with changed images.
 
 #### Podman updater script
