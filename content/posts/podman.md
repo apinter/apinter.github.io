@@ -777,8 +777,48 @@ AH00558: httpd-prefork: Could not reliably determine the server's fully qualifie
 This can output a lot of information and it is rolling with the container's lifecycle. To monitor the logs realtime as they come in - such as one would do it with `tail -f` - you can with `podman logs -f` followed by the container's name or ID.
  
 ### Persistent data
+Containers are not able to store persistent data. If we need an application to store data between restarts and updates we need to either attach a `volume` or `mount` storage space outside of the container from the host system.
+#### Mounts
+Are basically can be anything. A file, a folder stored anywhere on the host system. This is not a storage space that is managed by podman and can be accessed from the host system and from within the container. Creating a container with bind mount:
 
-#### Volume vs bind mount
+```
+$ podman run -it --name tw --mount type=bind,source=./binder,target=/mnt opensuse/tumbleweed /bin/bash                                                              
+# 8453197c43b9:/ # df -h
+Filesystem           Size  Used Avail Use% Mounted on
+fuse-overlayfs       231G   36G  195G  16% /
+/dev/mapper/cr_root  231G   36G  195G  16% /mnt
+tmpfs                 64M     0   64M   0% /dev
+tmpfs                4.0M     0  4.0M   0% /sys/fs/cgroup
+tmpfs                782M  374M  409M  48% /etc/hosts
+shm                   63M     0   63M   0% /dev/shm
+devtmpfs             3.9G     0  3.9G   0% /dev/tty
+tmpfs                3.9G     0  3.9G   0% /sys/kernel
+tmpfs                3.9G     0  3.9G   0% /proc/acpi
+tmpfs                3.9G     0  3.9G   0% /proc/scsi
+tmpfs                3.9G     0  3.9G   0% /sys/firmware
+tmpfs                3.9G     0  3.9G   0% /sys/dev
+# 8453197c43b9:/ # cd /mnt/
+# 8453197c43b9:/mnt # ls
+# 8453197c43b9:/mnt # touch -a test
+# 8453197c43b9:/mnt # ls
+test
+# 8453197c43b9:/mnt # exit
+exit
+$ cd binder                                                                                                                                                         
+$ ls -a                                                                                                                                                                
+total 0
+drwxr-xr-x 1 apinter users  8 Feb  5 18:31 .
+drwxr-xr-x 1 apinter users 32 Feb  5 17:58 ..
+-rw-r--r-- 1 apinter users  0 Feb  5 18:31 test                                                                                                                        
+```
+Breaking it down:
+* `podman run -it --name tw` will start a container in interactive mode and open a terminal (tty) inside the container which is named `tw`,
+* `--mount type=bind,source=./binder,target=/mnt` the `--mount` flag will tell podman that we want to mount something from the host filesystem, the type is set to `bind` then with `source` set the path to the folder and with `target` set the path within the container where to mount it,
+* `opensuse/tumbleweed /bin/bash` defining the image - in this case openSUSE Tumbleweed - and what to run which will be the `bash` shell,
+* Following that is a little proof-of-concpet that the created file from within the container stay on the host filesystem after exiting.
+
+#### Volumes
+Volumes, unlike bind mounts are managed by Podman and this is the prefferred way of having a persistent storage space attached to a container. If running a rootfull session the volume will be stored under `/var/lib/containers`, while rootless volumes will be stored under `~/.local/share/containers/storage`.
 
 
 
