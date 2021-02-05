@@ -221,7 +221,12 @@ docker.io/prom/prometheus                  latest  19162aa1f28d  2 weeks ago  17
 #### Managing images
 To list all available images use `podman images`. This will provide a list of every image that is currently available in the system and ready to be used without needing to pull it from a registry. To delete an image use `podman rmi`. Visit the `podman images` man page for more.
 
-### Pod creation
+### Podman Pods
+The pod concept has been introduced in Kuberentes and Docker users usually don't even think of the possibility or benefits to run pods in a local runtime or a development environment. Pods are great if for example you need a database (db) container that you don't want to bind it to a routable network. In comes the pod. Instead of binding the db to a routable network one can bind it to `localhost` therefore other containers within the pod can connect to it using `localhost` as they share the network name space. Another use case can be to group containers in pods. 
+Every pod has an 'infra' container that functions as the namespace holder, stores data on port bindings, cgroup-parent values, and kernel namespaces are all assigned to the “infra” container. Once the pod is created these values can not be changed. The pod can also allows one to start, stop, pause multiple containers at once just by doing the same, but instead by container the commands can be executed by pods resuting of a desired effect, but faster and a lot more comfortably.   
+For details on pod related cli commands visit the `podman pod` man page.
+
+#### Pod creation
 
 We create the pods by naming them - duh - and exposing the required ports. This way we're not required to setup containers individually in terms of publishing ports just adding the containers to them.   
 
