@@ -1,6 +1,6 @@
 ---
 title: "Podman quick start"
-date: 2021-02-03T13:14:50+07:00
+date: 2021-02-10T09:38:16+07:00
 descriptiom: General introduction to Podman 
 tags: ["Podman","container","automation"]
 ---
@@ -20,9 +20,56 @@ The barrier of entry for containers is low and to make thing even easier I use o
 
 ## Getting containers running
 
+### Rootfull or rootless
+
+As Podman is daemonless running containers doesn't require running them with root, but can be started with a user as well. Granted, rootless containers will have no access to networking and can't use privileged ports, but it is a great way to keep the system secure. For instance if an application escapes the container ran as a user it will be able to cause less damage and would have limited access to the system than if it would if it would ran as root. Rootfull containers are recommended for running applications that require access over privileged ports like a public facing `nginx` reverse proxy. Even in that case there could be some rules implemented in the firewall that forwards requests, but that's a different story.
+
+#### Rootless environment configuration 
+
+The next steps will allow for the deployment of a *rootless* configuration with Podman. Important to note the I'm using openSUSE MicroOS and Tumbleweed, but these changes should apply for other distros as well: 
+1. **Make sure that `fuse-overlayfs` is installed and it is available in the user `$PATH`.** (In openSUSE `fuse-overlayfs` is a dependency of Podman therefore when Podman is being installed it will install `fuse-overlayfs` as well.) 
+``` 
+# which fuse-overlayfs  
+/usr/bin/fuse-overlayfs 
+``` 
+2. **Enable user namespaces.** On openSUSE this step should not be necessary. Check the number of available namespaces that are allowed in the system in `/proc/sys/user/max_user_namespaces`. To set a value or a different value you need to run `sysctl user.max_user_namespaces=28633` as **root**. 
+3. **/etc/subuid and /etc/subgid configuration.** This is very important so instead of using my own words I move this out from the official Podman documentation and insert it here (source: [rootless tutorial](https://github.com/containers/podman/blob/master/docs/tutorials/rootless_tutorial.md))    
+
+Rootless Podman requires the user running it to have a range of UIDs listed in /etc/subuid and /etc/subgid files.  The `shadow-utils` or `newuid` package provides these files on different distributions and  they must be installed on the system.  These files will need someone with root privileges on the system to add or update the entries withi
+n them.  The following is a summarization from the [How does rootless Podman work?](https://opensource.com/article/19/2/how-does-rootless-podman-work) article by Dan Walsh on [opensource.com](https://opensource.com) 
+
+Update the /etc/subuid and /etc/subgid with fields for each user that will be allowed to create containers that look like the following.  Note that the values for each user must be unique and without any overlap.  If there is an overlap, there is a potential for a user to use another’s namespace and they could corrupt it. 
+
+``` 
+cat /etc/subuid 
+johndoe:100000:65536 
+test:165536:65536 
+``` 
+
+The format of this file is USERNAME:UID:RANGE 
+
+* username as listed in /etc/passwd or getpwent. 
+* The initial uid allocated for the user. 
+* The size of the range of UIDs allocated for the user. 
+
+This means the user johndoe is allocated UIDS 100000-165535 as well as their standard UID in the /etc/passwd file.  NOTE: this is not currently supported with network installs.  These files must be available locally to the host machine.  It is not possible to configure this with LDAP or Active Directory. 
+
+If you update either the /etc/subuid or the /etc/subgid file, you need to stop all the running containers owned by the user and kill the pause process that is running on the system for that user.  This can be done automatically by using the [podman system migrate](https://github.com/containers/podman/blob/master/docs/podman-system-migrate.1.md) command which will stop all the containers for the user and will kill the pause process. 
+
+Rather than updating the files directly, the usermod program can be used to assign UIDs and GIDs to a user. 
+```
+usermod --add-subuids 200000-201000 --add-subgids 200000-201000 johndoe 
+grep johndoe /etc/subuid /etc/subgid 
+/etc/subuid:johndoe:200000:1001 
+/etc/subgid:johndoe:200000:1001 
+```
+
+Here I would also add that you need to be careful with the `subuid` and `subgid` allocation as if the same `UID`/`GID` values are given to `users y` as well as for `user x` then `user y` will have access to the containers ran by `user x`.  
+
 ### Registries 
 
 Podman supports every OCI compliant registries like Dockerhub, Quay.io, Treescale etc. To check, add, and remove the registries the system uses one can simply edit `/etc/containers/registries.conf`.
+
 ```
 # For more information on this configuration file, see containers-registries.conf(5).
 #
@@ -148,9 +195,6 @@ Storing signatures
 ```
 ### Starting a container
 
-#### Rootfull or rootless
-As Podman is daemonless running containers doesn't require running them with root, but can be started with a user as well. Granted, rootless containers will have no access to networking and can't use privileged ports, but it is a great way to keep the system secure. For instance if an application escapes the container ran as a user it will be able to cause less damage and would have limited access to the system than if it would if it would ran as root. Rootfull containers are recommended for running applications that require access over privileged ports like a public facing `nginx` reverse proxy. Even in that case there could be some rules implemented in the firewall that forwards requests, but that's a different story.
-
 Starting a container that runs in the background and exposing port 8000 to be accessible from the outside:
 ```
 $ podman run -d -p 8000:8000 nginx                                                                                                      
@@ -219,9 +263,11 @@ docker.io/prom/prometheus                  latest  19162aa1f28d  2 weeks ago  17
 ```
 
 #### Managing images
+
 To list all available images use `podman images`. This will provide a list of every image that is currently available in the system and ready to be used without needing to pull it from a registry. To delete an image use `podman rmi`. Visit the `podman images` man page for more.
 
 ### Podman Pods
+
 The `pod` concept has been introduced in Kuberentes and Docker users usually don't even think of the possibility or benefits to run pods in a local runtime or a development environment. Pods are great if for example you need a database (db) container that you don't want to bind to a routable network. In comes the idea of the `pod`. Instead of binding the db to a routable network you can bind it to `localhost` therefore other containers within the pod can connect to it using `localhost` as they share the network name space. Another use case can be to group containers in pods. 
 Every pod has an 'infra' container that functions as the namespace holder, stores data on port bindings, cgroup-parent values, and kernel namespaces are all assigned to the “infra” container. Once the pod is created these values can not be changed. The pod can also allow to start, stop, pause multiple containers at once just by doing the same as would with a single container, but instead by container the commands can be executed by pods resulting of a desired effect, but faster and a lot more comfortably.   
 For details on pod related cli commands visit the `podman pod` man page. 
@@ -265,6 +311,7 @@ Breaking it down:
 Containers in pods can be managed individually regardless they're running within a pod. Do check above for the options for managing containers. This means that if you need to remove a container from a pod 
 
 #### Exporting pods
+
 Pods can be exported with `podman generate` command. This would allow one to take the exported pod and deploy it the same way it is deployed on the local runtime on a different Podman server or even on a Kubernetes cluster.
 ```
 $ podman generate kube yaltb                                                                                                                                              
@@ -821,6 +868,7 @@ Breaking it down:
 * Following that is a little proof-of-concept that the created file from within the container stay on the host file system after exiting.
 
 #### Volumes
+
 Volumes, unlike bind mounts are managed by Podman and this is the preferred way of having a persistent storage space attached to a container. If running a rootfull session the volume will be stored under `/var/lib/containers`, while rootless volumes will be stored under `~/.local/share/containers/storage`. To be able to attach volumes first need to create them with `podman volume create` and volumes can be listed with `podman volume list`. The volumes can be named and can have labels for meta information. 
 ```
 $ podman volume create testvol                                                                                               
@@ -894,6 +942,7 @@ Breaking it down (the command is almost identical to the one used in `bind mount
 For more visit the `podman volume` man page.
 
 ### Updating containers
+
 Can go about this a few different ways like pulling a container, launching it, mounting the necessary shares and config files and starting it on a different exposed port than the one we're planning to "update". Once this is done, tested and works fine can just change the route to point to this updated container. Me being a lazy DevOps engineer I don't like this option so let's visit `podman auto-update`.
 
 #### Podman auto-update
@@ -908,6 +957,7 @@ Podman's other important feature is the automatic updates of containers without 
 This to be followed by generating `systemd` units for the container: `podman generate systemd --new --files [container ID or name]`. Once this is ready and the unit file is under the corresponding `systemd` folder - depending on how podman is used, rootfull or rootless - the container unit to be started. Following this the `podman auto-update` command can update every container with changed images.
 
 #### Podman updater script
+
 Got a little shell script that runs every day. This creates fresh builds of custom containers, pushes them to a private registry, pulls certain images and updates every container. This ran by a service unit that is triggered by a timer. 
 ``` bash
 #!/bin/bash
@@ -934,9 +984,11 @@ build_db;
 auto_update;
 ```
 ## What's next
+
 Podman is a huge topic and this post is already fairly long, but covered just very little of it so this will be probably something ongoing what I'm going to do. Probably visit networking, building custom containers maybe CI related topics.
 
 ## References
+
 I strongly suggest checking out the man pages of podman which provides a lot of information straight from the terminal. Also the following articles will help a lot on your podman journey:
 * https://www.redhat.com/sysadmin/compose-podman-pods
 * https://www.redhat.com/sysadmin/rootless-podman-makes-sense
@@ -945,3 +997,4 @@ I strongly suggest checking out the man pages of podman which provides a lot of 
 * https://www.redhat.com/en/blog/understanding-root-inside-and-outside-container
 * https://developers.redhat.com/blog/2019/01/15/podman-managing-containers-pods/
 * https://developers.redhat.com/blog/2019/04/24/how-to-run-systemd-in-a-container/
+* https://github.com/containers/podman/blob/master/docs/tutorials/rootless_tutorial.md
