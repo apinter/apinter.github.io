@@ -11,7 +11,7 @@
 <meta property="og:description" content="" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://apinter.github.io/" />
-<meta property="og:updated_time" content="2021-02-03T10:16:19+07:00" />
+<meta property="og:updated_time" content="2021-02-20T04:55:04+07:00" />
 <meta name="twitter:card" content="summary"/>
 <meta name="twitter:title" content=""/>
 <meta name="twitter:description" content=""/>
@@ -48,6 +48,28 @@
 				<div class="site-description"><p>Yet Another Linux/Tech Blog - mostly my notes though</p></div>
 				
 				
+				
+				<section class="list-item">
+					<h1 class="title"><a href="/posts/podman-checkpoint-restore-btrfs/">Podman checkpoint/restore on btrfs</a></h1>
+					<time>Feb 20, 2021</time>
+					<br><div class="description">
+						
+						Podman Checkpoint/Restore in Userspace Recently I was migrating our entire Podman infra to a new, bigger server, roughly ~180 container. Most of our things are running in pods which are fairly easy to migrate, just podman generate kube --filename xyz.yml xyz-pod, clean up the yml a bit and on the new server I just play it with podman play xyz.yml. Done, pod migrated. On the other hand we have a few containers that are running outside of pods and was interested how lazy I can get with those using Podman.&hellip;
+						
+					</div>
+					<a href="/posts/podman-checkpoint-restore-btrfs/">Read more ⟶</a>
+				</section>
+				
+				<section class="list-item">
+					<h1 class="title"><a href="/posts/podman/">Podman quick start</a></h1>
+					<time>Feb 10, 2021</time>
+					<br><div class="description">
+						
+						What is Podman Podman is a a daemonless, open-source tool to manage, deploy and build application containers. Podman is using Open Containers Initiative (OCI) Containers and container images, which means that containers crated with/for Docker or CRI-o will work with Podman as well and vice versa. It is coming with a command line interface (CLI) which offers pretty much the same commands like Docker does. How similar are Podman commands to Docker&rsquo;s?&hellip;
+						
+					</div>
+					<a href="/posts/podman/">Read more ⟶</a>
+				</section>
 				
 				<section class="list-item">
 					<h1 class="title"><a href="/posts/git-sync-upstream-fork/">Syncing a fork with upstream</a></h1>
