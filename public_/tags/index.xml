@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tags on YAL/TB</title>
+    <link>https://apinter.github.io/tags/</link>
+    <description>Recent content in Tags on YAL/TB</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>GNU FDL 1.3</copyright>
+    <lastBuildDate>Wed, 10 Feb 2021 09:38:16 +0700</lastBuildDate><atom:link href="https://apinter.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>automation</title>
+      <link>https://apinter.github.io/tags/automation/</link>
+      <pubDate>Wed, 10 Feb 2021 09:38:16 +0700</pubDate>
+      
+      <guid>https://apinter.github.io/tags/automation/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>container</title>
+      <link>https://apinter.github.io/tags/container/</link>
+      <pubDate>Wed, 10 Feb 2021 09:38:16 +0700</pubDate>
+      
+      <guid>https://apinter.github.io/tags/container/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Podman</title>
+      <link>https://apinter.github.io/tags/podman/</link>
+      <pubDate>Wed, 10 Feb 2021 09:38:16 +0700</pubDate>
+      
+      <guid>https://apinter.github.io/tags/podman/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>fork</title>
+      <link>https://apinter.github.io/tags/fork/</link>
+      <pubDate>Wed, 03 Feb 2021 10:16:19 +0700</pubDate>
+      
+      <guid>https://apinter.github.io/tags/fork/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>git</title>
+      <link>https://apinter.github.io/tags/git/</link>
+      <pubDate>Wed, 03 Feb 2021 10:16:19 +0700</pubDate>
+      
+      <guid>https://apinter.github.io/tags/git/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>workflow</title>
+      <link>https://apinter.github.io/tags/workflow/</link>
+      <pubDate>Wed, 03 Feb 2021 10:16:19 +0700</pubDate>
+      
+      <guid>https://apinter.github.io/tags/workflow/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>first</title>
+      <link>https://apinter.github.io/tags/first/</link>
+      <pubDate>Sun, 31 Jan 2021 19:33:46 +0700</pubDate>
+      
+      <guid>https://apinter.github.io/tags/first/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>todo</title>
+      <link>https://apinter.github.io/tags/todo/</link>
+      <pubDate>Sun, 31 Jan 2021 19:33:46 +0700</pubDate>
+      
+      <guid>https://apinter.github.io/tags/todo/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>
