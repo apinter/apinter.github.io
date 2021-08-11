@@ -19,6 +19,7 @@
 Note: The pipeline has a bug cause I mixed zypper and apt, but it is fixed in the slides in my Github repo</description>
     </item>
     
+
     <item>
       <title>Podman checkpoint/restore on btrfs</title>
       <link>https://apinter.github.io/posts/podman-checkpoint-restore-btrfs/</link>
@@ -44,8 +45,7 @@ Note: The pipeline has a bug cause I mixed zypper and apt, but it is fixed in th
       
       <guid>https://apinter.github.io/posts/git-sync-upstream-fork/</guid>
       <description>Getting started By now you&amp;rsquo;re probably familiar with git. Git is a popular distributed version control system with which people can collaborate on pretty much anything that you can/want to version control and collaborate on. This can be source code, documentation, automation scripts, anything really. To work on a project with others, one would generally create a fork of the main repository where the code, it&amp;rsquo;s branches and issues are being stored at.</description>
-    </item>
-    
+    </item>    
     <item>
       <title>Initial Commit</title>
       <link>https://apinter.github.io/posts/initial-commit/</link>
