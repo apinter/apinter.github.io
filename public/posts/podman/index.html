@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html><head>
+	<meta charset="utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Podman quick start - YAL/TB</title><meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<meta property="og:image" content=""/>
+	<meta property="og:title" content="Podman quick start" />
+<meta property="og:description" content="What is Podman Podman is a a daemonless, open-source tool to manage, deploy and build application containers. Podman is using Open Containers Initiative (OCI) Containers and container images, which means that containers crated with/for Docker or CRI-o will work with Podman as well and vice versa. It is coming with a command line interface (CLI) which offers pretty much the same commands like Docker does. How similar are Podman commands to Docker&rsquo;s?" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://blog.adathor.com/posts/podman/" /><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-02-10T09:38:16+07:00" />
+<meta property="article:modified_time" content="2021-02-10T09:38:16+07:00" />
+
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Podman quick start"/>
+<meta name="twitter:description" content="What is Podman Podman is a a daemonless, open-source tool to manage, deploy and build application containers. Podman is using Open Containers Initiative (OCI) Containers and container images, which means that containers crated with/for Docker or CRI-o will work with Podman as well and vice versa. It is coming with a command line interface (CLI) which offers pretty much the same commands like Docker does. How similar are Podman commands to Docker&rsquo;s?"/>
+<script src="https://blog.adathor.com/js/feather.min.js"></script>
+	
+	<link href="https://blog.adathor.com/css/fonts.css" rel="stylesheet">
+	
+	<link rel="stylesheet" type="text/css" media="screen" href="https://blog.adathor.com/css/main.css" /><link rel="stylesheet" type="text/css" href="https://blog.adathor.com/css/dark.css"  />
+	
+	
+</head>
+<body>
+        <div class="content"><header>
+	<div class="main">
+		<a href="https://blog.adathor.com/">YAL/TB</a>
+	</div>
+	<nav>
+		
+		<a href="/">Home</a>
+		
+		<a href="/posts">All posts</a>
+		
+		<a href="/about">About</a>
+		
+		<a href="/tags">Tags</a>
+		
+	</nav>
+</header>
+
+<main>
+	<article>
+		<div class="title">
+			<h1 class="title">Podman quick start</h1>
+			<div class="meta">Posted on Feb 10, 2021</div>
+		</div>
+		
+
+		<section class="body">
+			<h2 id="what-is-podman">What is Podman</h2>
+<p>Podman is a a daemonless, open-source tool to manage, deploy and build application containers. Podman is using Open Containers Initiative (OCI) Containers and container images, which means that containers crated with/for Docker or CRI-o will work with Podman as well and vice versa. It is coming with a command line interface (CLI) which offers pretty much the same commands like Docker does. How similar are Podman commands to Docker&rsquo;s? Let&rsquo;s put it this way: many Podman users just alias <code>docker</code> to <code>podman</code>. Like other runtimes, Podman also relies on an OCI compliant container runtime to interface with the operating system. Podamn also has a RESTful API to manage containers, offers automatic updates of containers and has a fantastic <code>systemd</code> integration.</p>
+<h2 id="why-podman">Why Podman?</h2>
+<p>Due to a number of issues around Docker, the way they interact with and treat the community and the number of ignored security issues my choice of container management software falls on Podman. Podman has the same and in many cases better abilities than Docker. Podman supports <code>pods</code> which can be implemented on a standalone server and moved to others or even deployed in K8S.</p>
+<h2 id="before-and-after-a-recap">Before and after (a recap)</h2>
+<p>Previously we had everything running on KVM servers in VMs. This required over 200GB of ram and 32 cores over 2 Xeon Silver CPUs. Expensive. With the move to Podman and containerization of our infra we reduced that hardware requirement to about 10% of the KVM setup. This is able to sustain almost all of our requirements in a containerized format at a significantly lower total-cost-of-ownership (TCO).</p>
+<p>The barrier of entry for containers is low and to make thing even easier I use openSUSE MicroOS as the host of my Podman services. However, keeping the containers up-to-date and running 24/7 requires some deeper understanding and knowledge.</p>
+<h2 id="getting-containers-running">Getting containers running</h2>
+<h3 id="rootfull-or-rootless">Rootfull or rootless</h3>
+<p>As Podman is daemonless running containers doesn&rsquo;t require running them with root, but can be started with a user as well. Granted, rootless containers will have no access to networking and can&rsquo;t use privileged ports, but it is a great way to keep the system secure. For instance if an application escapes the container ran as a user it will be able to cause less damage and would have limited access to the system than if it would if it would ran as root. Rootfull containers are recommended for running applications that require access over privileged ports like a public facing <code>nginx</code> reverse proxy. Even in that case there could be some rules implemented in the firewall that forwards requests, but that&rsquo;s a different story.</p>
+<h4 id="rootless-environment-configuration">Rootless environment configuration</h4>
+<p>The next steps will allow for the deployment of a <em>rootless</em> configuration with Podman. Important to note the I&rsquo;m using openSUSE MicroOS and Tumbleweed, but these changes should apply for other distros as well:</p>
+<ol>
+<li><strong>Make sure that <code>fuse-overlayfs</code> is installed and it is available in the user <code>$PATH</code>.</strong> (In openSUSE <code>fuse-overlayfs</code> is a dependency of Podman therefore when Podman is being installed it will install <code>fuse-overlayfs</code> as well.)</li>
+</ol>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span># which fuse-overlayfs  
+</span></span><span style="display:flex;"><span>/usr/bin/fuse-overlayfs 
+</span></span></code></pre></div><ol start="2">
+<li><strong>Enable user namespaces.</strong> On openSUSE this step should not be necessary. Check the number of available namespaces that are allowed in the system in <code>/proc/sys/user/max_user_namespaces</code>. To set a value or a different value you need to run <code>sysctl user.max_user_namespaces=28633</code> as <strong>root</strong>.</li>
+<li><strong>/etc/subuid and /etc/subgid configuration.</strong> This is very important so instead of using my own words I move this out from the official Podman documentation and insert it here (source: <a href="https://github.com/containers/podman/blob/master/docs/tutorials/rootless_tutorial.md">rootless tutorial</a>)    </li>
+</ol>
+<p>Rootless Podman requires the user running it to have a range of UIDs listed in /etc/subuid and /etc/subgid files.  The <code>shadow-utils</code> or <code>newuid</code> package provides these files on different distributions and  they must be installed on the system.  These files will need someone with root privileges on the system to add or update the entries withi
+n them.  The following is a summarization from the <a href="https://opensource.com/article/19/2/how-does-rootless-podman-work">How does rootless Podman work?</a> article by Dan Walsh on <a href="https://opensource.com">opensource.com</a></p>
+<p>Update the /etc/subuid and /etc/subgid with fields for each user that will be allowed to create containers that look like the following.  Note that the values for each user must be unique and without any overlap.  If there is an overlap, there is a potential for a user to use another’s namespace and they could corrupt it.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>cat /etc/subuid 
+</span></span><span style="display:flex;"><span>johndoe:100000:65536 
+</span></span><span style="display:flex;"><span>test:165536:65536 
+</span></span></code></pre></div><p>The format of this file is USERNAME:UID:RANGE</p>
+<ul>
+<li>username as listed in /etc/passwd or getpwent.</li>
+<li>The initial uid allocated for the user.</li>
+<li>The size of the range of UIDs allocated for the user.</li>
+</ul>
+<p>This means the user johndoe is allocated UIDS 100000-165535 as well as their standard UID in the /etc/passwd file.  NOTE: this is not currently supported with network installs.  These files must be available locally to the host machine.  It is not possible to configure this with LDAP or Active Directory.</p>
+<p>If you update either the /etc/subuid or the /etc/subgid file, you need to stop all the running containers owned by the user and kill the pause process that is running on the system for that user.  This can be done automatically by using the <a href="https://github.com/containers/podman/blob/master/docs/podman-system-migrate.1.md">podman system migrate</a> command which will stop all the containers for the user and will kill the pause process.</p>
+<p>Rather than updating the files directly, the usermod program can be used to assign UIDs and GIDs to a user.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>usermod --add-subuids 200000-201000 --add-subgids 200000-201000 johndoe 
+</span></span><span style="display:flex;"><span>grep johndoe /etc/subuid /etc/subgid 
+</span></span><span style="display:flex;"><span>/etc/subuid:johndoe:200000:1001 
+</span></span><span style="display:flex;"><span>/etc/subgid:johndoe:200000:1001 
+</span></span></code></pre></div><p>Here I would also add that you need to be careful with the <code>subuid</code> and <code>subgid</code> allocation as if the same <code>UID</code>/<code>GID</code> values are given to <code>users y</code> as well as for <code>user x</code> then <code>user y</code> will have access to the containers ran by <code>user x</code>.  </p>
+<h3 id="registries">Registries</h3>
+<p>Podman supports every OCI compliant registries like Dockerhub, Quay.io, Treescale etc. To check, add, and remove the registries the system uses one can simply edit <code>/etc/containers/registries.conf</code>.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span># For more information on this configuration file, see containers-registries.conf(5).
+</span></span><span style="display:flex;"><span>#
+</span></span><span style="display:flex;"><span># Registries to search for images that are not fully-qualified.
+</span></span><span style="display:flex;"><span># i.e. foobar.com/my_image:latest vs my_image:latest
+</span></span><span style="display:flex;"><span>[registries.search]
+</span></span><span style="display:flex;"><span>registries = [&#34;registry.opensuse.org&#34;, &#34;docker.io&#34;]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># Registries that do not use TLS when pulling images or uses self-signed
+</span></span><span style="display:flex;"><span># certificates.
+</span></span><span style="display:flex;"><span>[registries.insecure]
+</span></span><span style="display:flex;"><span>registries = []
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span># Blocked Registries, blocks the `docker daemon` from pulling from the blocked registry.  If you specify
+</span></span><span style="display:flex;"><span># &#34;*&#34;, then the docker daemon will only be allowed to pull from registries listed above in the search
+</span></span><span style="display:flex;"><span># registries.  Blocked Registries is deprecated because other container runtimes and tools will not use it.
+</span></span><span style="display:flex;"><span># It is recommended that you use the trust policy file /etc/containers/policy.json to control which
+</span></span><span style="display:flex;"><span># registries you want to allow users to pull and push from.  policy.json gives greater flexibility, and
+</span></span><span style="display:flex;"><span># supports all container runtimes and tools including the docker daemon, cri-o, buildah ...
+</span></span><span style="display:flex;"><span>[registries.block]
+</span></span><span style="display:flex;"><span>registries = []
+</span></span></code></pre></div><p>As I&rsquo;m using openSUSE so I do have <code>registry.opensuse.org</code> added to my registries out of the box. You can add for example <code>quay.io</code> to this list to be able to search, pull, and push from/to Quay.</p>
+<h4 id="login-to-registry">Login to registry</h4>
+<p>Just like with Docker you can log in to a registry with your username and password using <code>podman login [registry]</code>. Once logged in the credentials will be stored in <code>${XDG_RUNTIME_DIR}/containers/auth.json</code>. For the sake of automation you could make a copy of this <code>auth.json</code> file to be used in different scripts for building or deploying containerized applications, but keep the file with your credentials safe.</p>
+<h3 id="searching-for-a-container">Searching for a container</h3>
+<p>To search with Podman for an application use:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>$ podman search nginx                                                                                                                                                     
+</span></span><span style="display:flex;"><span>INDEX         NAME                                                                                                                  DESCRIPTION                                      STARS   OFFICIAL  AUTOMATED
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/devel/kubic/containers/container/opensuse/nginx                                                                                                  0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/home/dcassany/obs-service/container/kubic-nginx-ingress-controller                                                                               0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/home/dcassany/obs-service/container/kubic/nginx-ingress-controller                                                                               0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/home/dmolkentin/video/containers/opensuse-nginx                                                                                                  0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/home/illuusio/images/images_15.2/opensuse/ilmi/nginx-fpm                                                                                         0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/home/illuusio/images/images_15.2/opensuse/ilmi/nginx-ssl                                                                                         0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/home/illuusio/images/images_15.2/opensuse/ilmi/nginx-uwsgi                                                                                       0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/home/mook_work/scf/nginx-buildpack-release/images/images/nginx-buildpack                                                                         0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/home/onielsen/virtualization/kubic-container/15.0/containers/kubic/nginx                                                                         0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/home/pgeorgiadis/branches/devel/caasp/kubic-container/container/kubic/nginx-ingress-controller                                                   0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/home/sjamgade/helm/opensuse_leap_15.2/nginx                                                                                                      0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/opensuse/factory/arm/totest/containers/opensuse/nginx                                                                                            0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/opensuse/factory/powerpc/totest/containers/opensuse/nginx                                                                                        0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/opensuse/factory/powerpc/totest/images/opensuse/nginx                                                                                            0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/opensuse/factory/totest/containers/opensuse/nginx                                                                                                0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/opensuse/factory/zsystems/images/opensuse/nginx                                                                                                  0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/opensuse/factory/zsystems/totest/containers/opensuse/nginx                                                                                       0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/opensuse/nginx                                                                                                                                   0                 
+</span></span><span style="display:flex;"><span>docker.io     docker.io/library/nginx                                                                                               Official build of Nginx.                         14378   [OK]      
+</span></span><span style="display:flex;"><span>docker.io     docker.io/jwilder/nginx-proxy                                                                                         Automated Nginx reverse proxy for docker con...  1951              [OK]
+</span></span></code></pre></div><p>To search in a specific repository:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>$ podman search registry.opensuse.org/nginx                                                                                                                               
+</span></span><span style="display:flex;"><span>INDEX         NAME                                                                                                                  DESCRIPTION  STARS   OFFICIAL  AUTOMATED
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/devel/kubic/containers/container/opensuse/nginx                                                              0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/home/dcassany/obs-service/container/kubic-nginx-ingress-controller                                           0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/home/dcassany/obs-service/container/kubic/nginx-ingress-controller                                           0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/home/dmolkentin/video/containers/opensuse-nginx                                                              0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/home/illuusio/images/images_15.2/opensuse/ilmi/nginx-fpm                                                     0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/home/illuusio/images/images_15.2/opensuse/ilmi/nginx-ssl                                                     0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/home/illuusio/images/images_15.2/opensuse/ilmi/nginx-uwsgi                                                   0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/home/mook_work/scf/nginx-buildpack-release/images/images/nginx-buildpack                                     0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/home/onielsen/virtualization/kubic-container/15.0/containers/kubic/nginx                                     0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/home/pgeorgiadis/branches/devel/caasp/kubic-container/container/kubic/nginx-ingress-controller               0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/home/sjamgade/helm/opensuse_leap_15.2/nginx                                                                  0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/opensuse/factory/arm/totest/containers/opensuse/nginx                                                        0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/opensuse/factory/powerpc/totest/containers/opensuse/nginx                                                    0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/opensuse/factory/powerpc/totest/images/opensuse/nginx                                                        0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/opensuse/factory/totest/containers/opensuse/nginx                                                            0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/opensuse/factory/zsystems/images/opensuse/nginx                                                              0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/opensuse/factory/zsystems/totest/containers/opensuse/nginx                                                   0                 
+</span></span><span style="display:flex;"><span>opensuse.org  registry.opensuse.org/opensuse/nginx                                                                                               0                 
+</span></span></code></pre></div><h2 id="pulling-a-container">Pulling a container</h2>
+<p>To pull a container:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>$ podman pull nginx                                                                                                                                                      Completed short name &#34;nginx&#34; with unqualified-search registries (origin: /etc/containers/registries.conf)
+</span></span><span style="display:flex;"><span>Trying to pull registry.opensuse.org/nginx:latest...
+</span></span><span style="display:flex;"><span>  name unknown
+</span></span><span style="display:flex;"><span>Trying to pull docker.io/library/nginx:latest...
+</span></span><span style="display:flex;"><span>Getting image source signatures
+</span></span><span style="display:flex;"><span>Copying blob f72584a26f32 done  
+</span></span><span style="display:flex;"><span>Copying blob 0732ab25fa22 done  
+</span></span><span style="display:flex;"><span>Copying blob 7125e4df9063 done  
+</span></span><span style="display:flex;"><span>Copying blob a076a628af6f done  
+</span></span><span style="display:flex;"><span>Copying blob d7f36f6fe38f done  
+</span></span><span style="display:flex;"><span>Copying config f6d0b4767a done  
+</span></span><span style="display:flex;"><span>Writing manifest to image destination
+</span></span><span style="display:flex;"><span>Storing signatures
+</span></span><span style="display:flex;"><span>f6d0b4767a6c466c178bf718f99bea0d3742b26679081e52dbf8e0c7c4c42d74
+</span></span></code></pre></div><p>To pull from a specific registry:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>$ podman pull registry.opensuse.org/opensuse/nginx                                                                                                                       
+</span></span><span style="display:flex;"><span>Trying to pull registry.opensuse.org/opensuse/nginx:latest...
+</span></span><span style="display:flex;"><span>Getting image source signatures
+</span></span><span style="display:flex;"><span>Copying blob fc491b4cab32 done  
+</span></span><span style="display:flex;"><span>Copying blob fd4952530c86 done  
+</span></span><span style="display:flex;"><span>Copying config 36fa073c57 done  
+</span></span><span style="display:flex;"><span>Writing manifest to image destination
+</span></span><span style="display:flex;"><span>Storing signatures
+</span></span><span style="display:flex;"><span>36fa073c57cc5251ac2df80de6a2e052dad9a10d6ffc9a9e65ba6eaa0ddea6ff
+</span></span></code></pre></div><p>To pull from a registry authenticated with an <code>auth.json</code> file stored in <code>~/.secret</code>:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>$ podman pull --authfile=~/.secret/auth.json registry.opensuse.org/opensuse/nginx                                                                                
+</span></span><span style="display:flex;"><span>Trying to pull registry.opensuse.org/opensuse/nginx:latest...
+</span></span><span style="display:flex;"><span>Getting image source signatures
+</span></span><span style="display:flex;"><span>Copying blob fc491b4cab32 done  
+</span></span><span style="display:flex;"><span>Copying blob fd4952530c86 done  
+</span></span><span style="display:flex;"><span>Copying config 36fa073c57 done  
+</span></span><span style="display:flex;"><span>Writing manifest to image destination
+</span></span><span style="display:flex;"><span>Storing signatures
+</span></span><span style="display:flex;"><span>19162aa1f28d9b92c87f788939bad1e3f6100ac8a1aeeed9448f642e8eb695d2
+</span></span></code></pre></div><h3 id="starting-a-container">Starting a container</h3>
+<p>Starting a container that runs in the background and exposing port 8000 to be accessible from the outside:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>$ podman run -d -p 8000:8000 nginx                                                                                                      
+</span></span><span style="display:flex;"><span>41e3829d1c800d40feb9d88ac962d29c8256b60ec5747f732717893d93b0f35e
+</span></span></code></pre></div><p>To list running containers:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>[~] podman ps                                                                                                                                              
+</span></span><span style="display:flex;"><span>CONTAINER ID  IMAGE                           COMMAND               CREATED        STATUS            PORTS                   NAMES
+</span></span><span style="display:flex;"><span>41e3829d1c80  docker.io/library/nginx:latest  nginx -g daemon o...  3 seconds ago  Up 3 seconds ago  0.0.0.0:8000-&gt;8000/tcp  suspicious_feistel
+</span></span></code></pre></div><p>This list provides a lot of information about running containers.
+To list every container, running or not:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>$ podman ps -a
+</span></span><span style="display:flex;"><span>CONTAINER ID  IMAGE                           COMMAND               CREATED         STATUS                      PORTS                   NAMES
+</span></span><span style="display:flex;"><span>81a872daad56  docker.io/library/nginx:latest  nix                   6 seconds ago   Exited (127) 6 seconds ago  0.0.0.0:8001-&gt;8001/tcp  wonderful_rubin
+</span></span><span style="display:flex;"><span>41e3829d1c80  docker.io/library/nginx:latest  nginx -g daemon o...  18 minutes ago  Up 18 minutes ago           0.0.0.0:8000-&gt;8000/tcp  suspicious_feistel
+</span></span><span style="display:flex;"><span>bc5030bffd6c  docker.io/library/nginx:latest  nginx -g daemon o...  18 minutes ago  Created                     0.0.0.0:80-&gt;8000/tcp    jolly_johnson
+</span></span></code></pre></div><p>If needed the output format of <code>podman ps</code> can be manipulated with the <code>--format</code> flag. For example to list only the container ID and the image name:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>[~] podman ps --format &#34;{{.ID}} {{.Image}}&#34;                                                                                                                           
+</span></span><span style="display:flex;"><span>41e3829d1c80 docker.io/library/nginx:latest
+</span></span></code></pre></div><p>This pretty print containers to JSON. The following placeholders are available:</p>
+<ul>
+<li>.ID: Container ID</li>
+<li>.Image:Image Name/ID</li>
+<li>.ImageID: Image ID</li>
+<li>.Command: Quoted command used</li>
+<li>.CreatedAt: Creation time for container</li>
+<li>.RunningFor: Time elapsed since container was started</li>
+<li>.Status: Status of container</li>
+<li>.Pod: Pod the container is associated with</li>
+<li>.Ports: Exposed ports</li>
+<li>.Size: Size of container</li>
+<li>.Names: Name of container</li>
+<li>.Labels: All the labels assigned to the container</li>
+<li>.Mounts: Volumes mounted in the container         <br>
+For more visit the <code>podman ps</code> man page.</li>
+</ul>
+<h4 id="deleting-containers-and-images">Deleting containers and images</h4>
+<p>Running containers or images that are being used can&rsquo;t be deleted unless it is forced. The best course of action is to stop the container then delete it, and then delete the image.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>[~] podman ps #List running containers                                                                                                                          
+</span></span><span style="display:flex;"><span>CONTAINER ID  IMAGE                           COMMAND               CREATED         STATUS             PORTS                   NAMES
+</span></span><span style="display:flex;"><span>41e3829d1c80  docker.io/library/nginx:latest  nginx -g daemon o...  22 minutes ago  Up 22 minutes ago  0.0.0.0:8000-&gt;8000/tcp  suspicious_feistel
+</span></span><span style="display:flex;"><span>$ podman stop suspicious_feistel #stop container by name                                                                             
+</span></span><span style="display:flex;"><span>41e3829d1c800d40feb9d88ac962d29c8256b60ec5747f732717893d93b0f35e
+</span></span><span style="display:flex;"><span>$ podman rm suspicious_feistel #Delete container by name
+</span></span><span style="display:flex;"><span>41e3829d1c800d40feb9d88ac962d29c8256b60ec5747f732717893d93b0f35e
+</span></span><span style="display:flex;"><span>[~] podman rmi nginx #Delete container image, this fails as there are other containers still using it                      
+</span></span><span style="display:flex;"><span>Error: 1 error occurred:
+</span></span><span style="display:flex;"><span>        * could not remove image f6d0b4767a6c466c178bf718f99bea0d3742b26679081e52dbf8e0c7c4c42d74 as it is being used by 2 containers: image is being used
+</span></span><span style="display:flex;"><span>[~] podman rm jolly_johnson wonderful_rubin #Remove containers that are still using the nginx image                                    
+</span></span><span style="display:flex;"><span>81a872daad5661a7704e47c4f5025db502852cf7cc0aaaa439e71a9fa915e9b9
+</span></span><span style="display:flex;"><span>bc5030bffd6c604192c31911141d728378b69832cafbf81d97d976d59fc5f86d
+</span></span><span style="display:flex;"><span>[~] podman rmi nginx #Delete the image                                                                         
+</span></span><span style="display:flex;"><span>Untagged: docker.io/library/nginx:latest
+</span></span><span style="display:flex;"><span>Deleted: f6d0b4767a6c466c178bf718f99bea0d3742b26679081e52dbf8e0c7c4c42d74
+</span></span><span style="display:flex;"><span>$ podman images #List available, pulled images
+</span></span><span style="display:flex;"><span>REPOSITORY                                 TAG     IMAGE ID      CREATED      SIZE
+</span></span><span style="display:flex;"><span>registry.opensuse.org/opensuse/tumbleweed  latest  111d1befeae4  2 days ago   94.4 MB
+</span></span><span style="display:flex;"><span>registry.opensuse.org/opensuse/nginx       latest  36fa073c57cc  3 days ago   103 MB
+</span></span><span style="display:flex;"><span>docker.io/prom/prometheus                  latest  19162aa1f28d  2 weeks ago  174 MB
+</span></span></code></pre></div><h4 id="managing-images">Managing images</h4>
+<p>To list all available images use <code>podman images</code>. This will provide a list of every image that is currently available in the system and ready to be used without needing to pull it from a registry. To delete an image use <code>podman rmi</code>. Visit the <code>podman images</code> man page for more.</p>
+<h3 id="podman-pods">Podman Pods</h3>
+<p>The <code>pod</code> concept has been introduced in Kuberentes and Docker users usually don&rsquo;t even think of the possibility or benefits to run pods in a local runtime or a development environment. Pods are great if for example you need a database (db) container that you don&rsquo;t want to bind to a routable network. In comes the idea of the <code>pod</code>. Instead of binding the db to a routable network you can bind it to <code>localhost</code> therefore other containers within the pod can connect to it using <code>localhost</code> as they share the network name space. Another use case can be to group containers in pods.
+Every pod has an &lsquo;infra&rsquo; container that functions as the namespace holder, stores data on port bindings, cgroup-parent values, and kernel namespaces are all assigned to the “infra” container. Once the pod is created these values can not be changed. The pod can also allow to start, stop, pause multiple containers at once just by doing the same as would with a single container, but instead by container the commands can be executed by pods resulting of a desired effect, but faster and a lot more comfortably.<br>
+For details on pod related cli commands visit the <code>podman pod</code> man page.</p>
+<h4 id="pod-creation">Pod creation</h4>
+<p>You can create the pods by naming them and exposing the required ports. This way we&rsquo;re not required to setup containers individually in terms of publishing ports just adding the containers to them.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>$ podman pod create -n yaltb -p 8000:8000                                                                        
+</span></span><span style="display:flex;"><span>7244e77552d9bee402383a37906813b4194cef89c930c87d4d590d92fce827b0
+</span></span><span style="display:flex;"><span>$ podman pod list                                                                            
+</span></span><span style="display:flex;"><span>POD ID        NAME    STATUS   CREATED        INFRA ID      # OF CONTAINERS
+</span></span><span style="display:flex;"><span>7244e77552d9  yaltb   Created  8 seconds ago  4a696258e500  1
+</span></span></code></pre></div><p>A little breakdown here:</p>
+<ul>
+<li><code>-n</code> or <code>--name</code> will allow to set the name of the pod.</li>
+<li><code>-p</code> or <code>--publish</code> will expose the desired port(s) that will be used to access container(s) from outside the host.</li>
+<li><code>podman pod list</code> is listing the available pods with their basic information.
+For more information visit the <code>podman pod create</code> man page.</li>
+</ul>
+<h4 id="adding-containers-to-a-pod">Adding containers to a pod</h4>
+<p>Pods can hold as many containers as you want. To add containers just set the <code>--pod</code> flag when creating the container.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>$ podman run -d --pod yaltb nginx                                                                                                                                         
+</span></span><span style="display:flex;"><span>6645234da2d18f60632fdcfed3a7825a81649c606dfeba70fec11b9d5479174d
+</span></span><span style="display:flex;"><span>$ podman pod list                                                                                                                                                         
+</span></span><span style="display:flex;"><span>POD ID        NAME    STATUS   CREATED         INFRA ID      # OF CONTAINERS
+</span></span><span style="display:flex;"><span>7244e77552d9  yaltb   Running  10 minutes ago  4a696258e500  2
+</span></span><span style="display:flex;"><span>$ podman ps -a --pod                                                                                                                                                      
+</span></span><span style="display:flex;"><span>CONTAINER ID  IMAGE                 COMMAND          CREATED         STATUS             PORTS                   NAMES               POD ID        PODNAME
+</span></span><span style="display:flex;"><span>6645234da2d1  nginx                 /usr/sbin/nginx  15 seconds ago  Up 15 seconds ago  0.0.0.0:8000-&gt;8000/tcp  clever_williamson   7244e77552d9  yaltb
+</span></span><span style="display:flex;"><span>4a696258e500  k8s.gcr.io/pause:3.2                   10 minutes ago  Up 15 seconds ago  0.0.0.0:8000-&gt;8000/tcp  7244e77552d9-infra  7244e77552d9  yaltb
+</span></span></code></pre></div><p>Breaking it down:</p>
+<ul>
+<li><code>podman run -d --pod yaltb nginx</code> will create and add an <code>nginx</code> container to the previously create <code>yaltb</code> pod. The pod has been defined by the <code>--pod</code> flag followed by the name of the pod. Notice that we didn&rsquo;t expose ports as they are already exposed in the created port. <strong>Important:</strong> network can&rsquo;t be configured when it is shared with a pod therefore you need to expose/publish ports upon pod creation.</li>
+<li><code>podman ps -a --pod</code> will list every container that is running in pods.</li>
+</ul>
+<h4 id="managing-containers-in-pods">Managing containers in pods</h4>
+<p>Containers in pods can be managed individually regardless they&rsquo;re running within a pod. Do check above for the options for managing containers. This means that if you need to remove a container from a pod</p>
+<h4 id="exporting-pods">Exporting pods</h4>
+<p>Pods can be exported with <code>podman generate</code> command. This would allow one to take the exported pod and deploy it the same way it is deployed on the local runtime on a different Podman server or even on a Kubernetes cluster.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>$ podman generate kube yaltb                                                                                                                                              
+</span></span><span style="display:flex;"><span># Generation of Kubernetes YAML is still under development!
+</span></span><span style="display:flex;"><span>#
+</span></span><span style="display:flex;"><span># Save the output of this file and use kubectl create -f to import
+</span></span><span style="display:flex;"><span># it into Kubernetes.
+</span></span><span style="display:flex;"><span>#
+</span></span><span style="display:flex;"><span># Created with podman-2.2.1
+</span></span><span style="display:flex;"><span>apiVersion: v1
+</span></span><span style="display:flex;"><span>kind: Pod
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  creationTimestamp: &#34;2021-02-05T05:28:08Z&#34;
+</span></span><span style="display:flex;"><span>  labels:
+</span></span><span style="display:flex;"><span>    app: yaltb
+</span></span><span style="display:flex;"><span>  name: yaltb
+</span></span><span style="display:flex;"><span>spec:
+</span></span><span style="display:flex;"><span>  containers:
+</span></span><span style="display:flex;"><span>  - command:
+</span></span><span style="display:flex;"><span>    - /usr/sbin/nginx
+</span></span><span style="display:flex;"><span>    env:
+</span></span><span style="display:flex;"><span>    - name: PATH
+</span></span><span style="display:flex;"><span>      value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+</span></span><span style="display:flex;"><span>    - name: TERM
+</span></span><span style="display:flex;"><span>      value: xterm
+</span></span><span style="display:flex;"><span>    - name: container
+</span></span><span style="display:flex;"><span>      value: podman
+</span></span><span style="display:flex;"><span>    - name: HOSTNAME
+</span></span><span style="display:flex;"><span>      value: yaltb
+</span></span><span style="display:flex;"><span>    image: nginx
+</span></span><span style="display:flex;"><span>    name: condescendinggalois
+</span></span><span style="display:flex;"><span>    ports:
+</span></span><span style="display:flex;"><span>    - containerPort: 8000
+</span></span><span style="display:flex;"><span>      hostPort: 8000
+</span></span><span style="display:flex;"><span>      protocol: TCP
+</span></span><span style="display:flex;"><span>    resources: {}
+</span></span><span style="display:flex;"><span>    securityContext:
+</span></span><span style="display:flex;"><span>      allowPrivilegeEscalation: true
+</span></span><span style="display:flex;"><span>      capabilities: {}
+</span></span><span style="display:flex;"><span>      privileged: false
+</span></span><span style="display:flex;"><span>      readOnlyRootFilesystem: false
+</span></span><span style="display:flex;"><span>      seLinuxOptions: {}
+</span></span><span style="display:flex;"><span>    workingDir: /
+</span></span><span style="display:flex;"><span>  - command:
+</span></span><span style="display:flex;"><span>    - /usr/sbin/nginx
+</span></span><span style="display:flex;"><span>    env:
+</span></span><span style="display:flex;"><span>    - name: PATH
+</span></span><span style="display:flex;"><span>      value: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+</span></span><span style="display:flex;"><span>    - name: TERM
+</span></span><span style="display:flex;"><span>      value: xterm
+</span></span><span style="display:flex;"><span>    - name: container
+</span></span><span style="display:flex;"><span>      value: podman
+</span></span><span style="display:flex;"><span>    - name: HOSTNAME
+</span></span><span style="display:flex;"><span>      value: yaltb
+</span></span><span style="display:flex;"><span>    image: nginx
+</span></span><span style="display:flex;"><span>    name: cleverwilliamson
+</span></span><span style="display:flex;"><span>    resources: {}
+</span></span><span style="display:flex;"><span>    securityContext:
+</span></span><span style="display:flex;"><span>      allowPrivilegeEscalation: true
+</span></span><span style="display:flex;"><span>      capabilities: {}
+</span></span><span style="display:flex;"><span>      privileged: false
+</span></span><span style="display:flex;"><span>      readOnlyRootFilesystem: false
+</span></span><span style="display:flex;"><span>      seLinuxOptions: {}
+</span></span><span style="display:flex;"><span>    workingDir: /
+</span></span><span style="display:flex;"><span>  restartPolicy: Never
+</span></span><span style="display:flex;"><span>status: {}
+</span></span><span style="display:flex;"><span>---
+</span></span><span style="display:flex;"><span>metadata:
+</span></span><span style="display:flex;"><span>  creationTimestamp: null
+</span></span><span style="display:flex;"><span>spec: {}
+</span></span><span style="display:flex;"><span>status:
+</span></span><span style="display:flex;"><span>  loadBalancer: {}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>$ podman pod stop yaltb                                                                                                                                                   
+</span></span><span style="display:flex;"><span>7244e77552d9bee402383a37906813b4194cef89c930c87d4d590d92fce827b0
+</span></span><span style="display:flex;"><span>$ podman pod rm yaltb                                                                                                                                                     
+</span></span><span style="display:flex;"><span>7244e77552d9bee402383a37906813b4194cef89c930c87d4d590d92fce827b0
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>$ podman play kube yaltb_pod.yml                                                                                                                                          
+</span></span><span style="display:flex;"><span>Pod:
+</span></span><span style="display:flex;"><span>ce21bc0689409795800d7e0f699f4503b6be8f7f81bcc4fabc33e5da32bba164
+</span></span><span style="display:flex;"><span>Containers:
+</span></span><span style="display:flex;"><span>13e9f16b1aaaa7be1f19c87c21d99deaca3862d97293b98c20bf792d72738911
+</span></span><span style="display:flex;"><span>c5f8e4364b0e0caca047b3797ffc0aaf268460aee9249efc4d46259c4693eddd
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[~] podman pod ps                                                                                                                                                           
+</span></span><span style="display:flex;"><span>POD ID        NAME    STATUS    CREATED         INFRA ID      # OF CONTAINERS
+</span></span><span style="display:flex;"><span>ce21bc068940  yaltb   Degraded  11 seconds ago  c78bebfb3cc3  3
+</span></span><span style="display:flex;"><span>[~] podman ps -a --pod                                                                                                                                                      
+</span></span><span style="display:flex;"><span>CONTAINER ID  IMAGE                 COMMAND          CREATED         STATUS                     PORTS                   NAMES                      POD ID        PODNAME
+</span></span><span style="display:flex;"><span>13e9f16b1aaa  nginx                 /usr/sbin/nginx  19 seconds ago  Up 19 seconds ago          0.0.0.0:8000-&gt;8000/tcp  yaltb-condescendinggalois  ce21bc068940  yaltb
+</span></span><span style="display:flex;"><span>c5f8e4364b0e  nginx                 /usr/sbin/nginx  19 seconds ago  Exited (1) 16 seconds ago  0.0.0.0:8000-&gt;8000/tcp  yaltb-cleverwilliamson     ce21bc068940  yaltb
+</span></span><span style="display:flex;"><span>c78bebfb3cc3  k8s.gcr.io/pause:3.2                   19 seconds ago  Up 19 seconds ago          0.0.0.0:8000-&gt;8000/tcp  ce21bc068940-infra         ce21bc068940  yaltb
+</span></span><span style="display:flex;"><span>[~] podman ps  --pod                                                                                                                                                        
+</span></span><span style="display:flex;"><span>CONTAINER ID  IMAGE                 COMMAND          CREATED         STATUS             PORTS                   NAMES                      POD ID        PODNAME
+</span></span><span style="display:flex;"><span>13e9f16b1aaa  nginx                 /usr/sbin/nginx  30 seconds ago  Up 30 seconds ago  0.0.0.0:8000-&gt;8000/tcp  yaltb-condescendinggalois  ce21bc068940  yaltb
+</span></span><span style="display:flex;"><span>c78bebfb3cc3  k8s.gcr.io/pause:3.2                   30 seconds ago  Up 30 seconds ago  0.0.0.0:8000-&gt;8000/tcp  ce21bc068940-infra         ce21bc068940  yaltb
+</span></span><span style="display:flex;"><span> 
+</span></span></code></pre></div><p>Lets break down the above:</p>
+<ul>
+<li><code>podman generate kube yaltb</code> will generated a <code>YAML</code> file which one can take to another server and <code>play</code> it providing the same exact pod that it is running on the local runtime.</li>
+<li><code>podman pod stop yaltb</code> will stop the <code>yaltb</code> pod and all the containers in it.</li>
+<li><code>podman pod rm yaltb</code> will delete the <code>yaltb</code> pod.</li>
+<li><code>podman play kube yaltb_pod.yml</code> will start the exported pods based on the <code>YAML</code> file. The pod and the containers in the pod listed in the following commands.</li>
+</ul>
+<h3 id="podman-and-systemd">Podman and systemd</h3>
+<p>Podman has a fantastic integration with <code>systemd</code>. I believe at this point the users are even able to run <code>systemd</code> <strong>within</strong> a container which makes perfect sense. Why would we have to use anything different inside a container than we already got used to outside of a container. Anyhow we not covering this, but managing containers with <code>systemd</code>.
+As we deploy more and more containers managing them using the Podman cli tool only may quickly become burdensome. It is much easier to manage the pods and containers with <code>systemd</code> for example to restart, stop, or to start them. Using <code>systemd</code> will also enable us to utilize <code>podman auto-update</code> for updating the containers.</p>
+<h4 id="generating-a-systemd-unit">Generating a systemd unit</h4>
+<p>Podman has the ability to generate the unit files for us which is probably a relief as it makes life incredibly comfortable. Criteria is that it outputs the generated units into a file using the container&rsquo;s name or ID. In this example I will go for the ID which I will cover why in the <code>Podman auto-update</code> section.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>$ podman generate systemd --files --new admiring_franklin                                                                                                                 
+</span></span><span style="display:flex;"><span>/home/yaltb/container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.service   
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>$ cat container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.service                                                                                  
+</span></span><span style="display:flex;"><span># container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.service
+</span></span><span style="display:flex;"><span># autogenerated by Podman 2.2.1
+</span></span><span style="display:flex;"><span># Fri Feb  5 12:52:43 WIB 2021
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[Unit]
+</span></span><span style="display:flex;"><span>Description=Podman container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.service
+</span></span><span style="display:flex;"><span>Documentation=man:podman-generate-systemd(1)
+</span></span><span style="display:flex;"><span>Wants=network.target
+</span></span><span style="display:flex;"><span>After=network-online.target
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[Service]
+</span></span><span style="display:flex;"><span>Environment=PODMAN_SYSTEMD_UNIT=%n
+</span></span><span style="display:flex;"><span>Restart=on-failure
+</span></span><span style="display:flex;"><span>ExecStartPre=/bin/rm -f %t/container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.pid %t/container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.ctr-id
+</span></span><span style="display:flex;"><span>ExecStart=/usr/bin/podman run --conmon-pidfile %t/container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.pid --cidfile %t/container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.ctr-id --cgroups=no-conmon -d -p 8000:8000 nginx
+</span></span><span style="display:flex;"><span>ExecStop=/usr/bin/podman stop --ignore --cidfile %t/container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.ctr-id -t 10
+</span></span><span style="display:flex;"><span>ExecStopPost=/usr/bin/podman rm --ignore -f --cidfile %t/container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.ctr-id
+</span></span><span style="display:flex;"><span>PIDFile=%t/container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.pid
+</span></span><span style="display:flex;"><span>KillMode=none
+</span></span><span style="display:flex;"><span>Type=forking
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>[Install]
+</span></span><span style="display:flex;"><span>WantedBy=multi-user.target default.target
+</span></span></code></pre></div><p>Breaking all that down:</p>
+<ul>
+<li><code>podman generate systemd</code> which will generate <code>systemd</code> units</li>
+<li><code> --files</code> which will output the generated unit to a file as `container-[$CONTAINERNAME]</li>
+<li><code> --new admiring_franklin</code> will allow <code>systemd</code> to create and run updated images followed by the container&rsquo;s name.</li>
+</ul>
+<p>This unit file can be added to <code>systemd</code>, enabled and pretty much it. Podman and systemd will take care of everything following like starting the container on boot and updating it. When running a rootless Podman session:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>$ mv container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.service ~/.config/systemd/user/
+</span></span><span style="display:flex;"><span>$ systemctl --user enable --now container-aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7.service
+</span></span></code></pre></div><h3 id="podman-inspect-and-logs">Podman inspect and logs</h3>
+<p>To reveal the parameters a container or a pod has been created with we can use the <code>podman inspect</code> command followed by the name/id of the container or pod.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>$ podman inspect admiring_franklin                                                                                                                                        
+</span></span><span style="display:flex;"><span>[
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        &#34;Id&#34;: &#34;aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7&#34;,
+</span></span><span style="display:flex;"><span>        &#34;Created&#34;: &#34;2021-02-05T12:52:23.83123341+07:00&#34;,
+</span></span><span style="display:flex;"><span>        &#34;Path&#34;: &#34;/usr/local/bin/entrypoint.sh&#34;,
+</span></span><span style="display:flex;"><span>        &#34;Args&#34;: [
+</span></span><span style="display:flex;"><span>            &#34;/usr/sbin/nginx&#34;
+</span></span><span style="display:flex;"><span>        ],
+</span></span><span style="display:flex;"><span>        &#34;State&#34;: {
+</span></span><span style="display:flex;"><span>            &#34;OciVersion&#34;: &#34;1.0.2-dev&#34;,
+</span></span><span style="display:flex;"><span>            &#34;Status&#34;: &#34;running&#34;,
+</span></span><span style="display:flex;"><span>            &#34;Running&#34;: true,
+</span></span><span style="display:flex;"><span>            &#34;Paused&#34;: false,
+</span></span><span style="display:flex;"><span>            &#34;Restarting&#34;: false,
+</span></span><span style="display:flex;"><span>            &#34;OOMKilled&#34;: false,
+</span></span><span style="display:flex;"><span>            &#34;Dead&#34;: false,
+</span></span><span style="display:flex;"><span>            &#34;Pid&#34;: 26725,
+</span></span><span style="display:flex;"><span>            &#34;ConmonPid&#34;: 26714,
+</span></span><span style="display:flex;"><span>            &#34;ExitCode&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;Error&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>            &#34;StartedAt&#34;: &#34;2021-02-05T12:52:24.009065815+07:00&#34;,
+</span></span><span style="display:flex;"><span>            &#34;FinishedAt&#34;: &#34;0001-01-01T00:00:00Z&#34;,
+</span></span><span style="display:flex;"><span>            &#34;Healthcheck&#34;: {
+</span></span><span style="display:flex;"><span>                &#34;Status&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>                &#34;FailingStreak&#34;: 0,
+</span></span><span style="display:flex;"><span>                &#34;Log&#34;: null
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>        &#34;Image&#34;: &#34;36fa073c57cc5251ac2df80de6a2e052dad9a10d6ffc9a9e65ba6eaa0ddea6ff&#34;,
+</span></span><span style="display:flex;"><span>        &#34;ImageName&#34;: &#34;nginx&#34;,
+</span></span><span style="display:flex;"><span>        &#34;Rootfs&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>        &#34;Pod&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>        &#34;ResolvConfPath&#34;: &#34;/run/user/1000/containers/overlay-containers/aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7/userdata/resolv.conf&#34;,
+</span></span><span style="display:flex;"><span>        &#34;HostnamePath&#34;: &#34;/run/user/1000/containers/overlay-containers/aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7/userdata/hostname&#34;,
+</span></span><span style="display:flex;"><span>        &#34;HostsPath&#34;: &#34;/run/user/1000/containers/overlay-containers/aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7/userdata/hosts&#34;,
+</span></span><span style="display:flex;"><span>        &#34;StaticDir&#34;: &#34;/home/apinter/.local/share/containers/storage/overlay-containers/aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7/userdata&#34;,
+</span></span><span style="display:flex;"><span>        &#34;OCIConfigPath&#34;: &#34;/home/apinter/.local/share/containers/storage/overlay-containers/aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7/userdata/config.json&#34;,
+</span></span><span style="display:flex;"><span>        &#34;OCIRuntime&#34;: &#34;runc&#34;,
+</span></span><span style="display:flex;"><span>        &#34;LogPath&#34;: &#34;/home/apinter/.local/share/containers/storage/overlay-containers/aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7/userdata/ctr.log&#34;,
+</span></span><span style="display:flex;"><span>        &#34;LogTag&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>        &#34;ConmonPidFile&#34;: &#34;/run/user/1000/containers/overlay-containers/aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7/userdata/conmon.pid&#34;,
+</span></span><span style="display:flex;"><span>        &#34;Name&#34;: &#34;admiring_franklin&#34;,
+</span></span><span style="display:flex;"><span>        &#34;RestartCount&#34;: 0,
+</span></span><span style="display:flex;"><span>        &#34;Driver&#34;: &#34;overlay&#34;,
+</span></span><span style="display:flex;"><span>        &#34;MountLabel&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>        &#34;ProcessLabel&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>        &#34;AppArmorProfile&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>        &#34;EffectiveCaps&#34;: [
+</span></span><span style="display:flex;"><span>            &#34;CAP_AUDIT_WRITE&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_CHOWN&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_DAC_OVERRIDE&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_FOWNER&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_FSETID&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_KILL&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_MKNOD&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_NET_BIND_SERVICE&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_NET_RAW&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_SETFCAP&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_SETGID&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_SETPCAP&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_SETUID&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_SYS_CHROOT&#34;
+</span></span><span style="display:flex;"><span>        ],
+</span></span><span style="display:flex;"><span>        &#34;BoundingCaps&#34;: [
+</span></span><span style="display:flex;"><span>            &#34;CAP_AUDIT_WRITE&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_CHOWN&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_DAC_OVERRIDE&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_FOWNER&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_FSETID&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_KILL&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_MKNOD&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_NET_BIND_SERVICE&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_NET_RAW&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_SETFCAP&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_SETGID&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_SETPCAP&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_SETUID&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CAP_SYS_CHROOT&#34;
+</span></span><span style="display:flex;"><span>        ],
+</span></span><span style="display:flex;"><span>        &#34;ExecIDs&#34;: [],
+</span></span><span style="display:flex;"><span>        &#34;GraphDriver&#34;: {
+</span></span><span style="display:flex;"><span>            &#34;Name&#34;: &#34;overlay&#34;,
+</span></span><span style="display:flex;"><span>            &#34;Data&#34;: {
+</span></span><span style="display:flex;"><span>                &#34;LowerDir&#34;: &#34;/home/apinter/.local/share/containers/storage/overlay/9f76177964d37dd2b6b0a0d675d83279c746568e764856d39cbcd9124196d776/diff:/home/apinter/.local/share/containers/storage/overlay/b81706afabe1f2b78cf2592b4f177f245563e5a33819f4e04a9edff9e0ddbbd8/diff&#34;,
+</span></span><span style="display:flex;"><span>                &#34;MergedDir&#34;: &#34;/home/apinter/.local/share/containers/storage/overlay/4eda62ca4ff798cc5e7361e8ea0f9126aa12e91e676036245d90b3e0d790b632/merged&#34;,
+</span></span><span style="display:flex;"><span>                &#34;UpperDir&#34;: &#34;/home/apinter/.local/share/containers/storage/overlay/4eda62ca4ff798cc5e7361e8ea0f9126aa12e91e676036245d90b3e0d790b632/diff&#34;,
+</span></span><span style="display:flex;"><span>                &#34;WorkDir&#34;: &#34;/home/apinter/.local/share/containers/storage/overlay/4eda62ca4ff798cc5e7361e8ea0f9126aa12e91e676036245d90b3e0d790b632/work&#34;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>        &#34;Mounts&#34;: [
+</span></span><span style="display:flex;"><span>            {
+</span></span><span style="display:flex;"><span>                &#34;Type&#34;: &#34;volume&#34;,
+</span></span><span style="display:flex;"><span>                &#34;Name&#34;: &#34;c86360b3e3d6b0a0cdc60cf3cb4504a267933d154dae282a7caf760c7b599cdf&#34;,
+</span></span><span style="display:flex;"><span>                &#34;Source&#34;: &#34;/home/apinter/.local/share/containers/storage/volumes/c86360b3e3d6b0a0cdc60cf3cb4504a267933d154dae282a7caf760c7b599cdf/_data&#34;,
+</span></span><span style="display:flex;"><span>                &#34;Destination&#34;: &#34;/data&#34;,
+</span></span><span style="display:flex;"><span>                &#34;Driver&#34;: &#34;local&#34;,
+</span></span><span style="display:flex;"><span>                &#34;Mode&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>                &#34;Options&#34;: [
+</span></span><span style="display:flex;"><span>                    &#34;nodev&#34;,
+</span></span><span style="display:flex;"><span>                    &#34;exec&#34;,
+</span></span><span style="display:flex;"><span>                    &#34;nosuid&#34;,
+</span></span><span style="display:flex;"><span>                    &#34;rbind&#34;
+</span></span><span style="display:flex;"><span>                ],
+</span></span><span style="display:flex;"><span>                &#34;RW&#34;: true,
+</span></span><span style="display:flex;"><span>                &#34;Propagation&#34;: &#34;rprivate&#34;
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>        ],
+</span></span><span style="display:flex;"><span>        &#34;Dependencies&#34;: [],
+</span></span><span style="display:flex;"><span>        &#34;NetworkSettings&#34;: {
+</span></span><span style="display:flex;"><span>            &#34;EndpointID&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>            &#34;Gateway&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>            &#34;IPAddress&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>            &#34;IPPrefixLen&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;IPv6Gateway&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>            &#34;GlobalIPv6Address&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>            &#34;GlobalIPv6PrefixLen&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;MacAddress&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>            &#34;Bridge&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>            &#34;SandboxID&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>            &#34;HairpinMode&#34;: false,
+</span></span><span style="display:flex;"><span>            &#34;LinkLocalIPv6Address&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>            &#34;LinkLocalIPv6PrefixLen&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;Ports&#34;: {
+</span></span><span style="display:flex;"><span>                &#34;8000/tcp&#34;: [
+</span></span><span style="display:flex;"><span>                    {
+</span></span><span style="display:flex;"><span>                        &#34;HostIp&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>                        &#34;HostPort&#34;: &#34;8000&#34;
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                ]
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>            &#34;SandboxKey&#34;: &#34;/run/user/1000/netns/cni-ca08b508-01ec-9f12-554f-109725a54e4f&#34;
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>        &#34;ExitCommand&#34;: [
+</span></span><span style="display:flex;"><span>            &#34;/usr/bin/podman&#34;,
+</span></span><span style="display:flex;"><span>            &#34;--root&#34;,
+</span></span><span style="display:flex;"><span>            &#34;/home/apinter/.local/share/containers/storage&#34;,
+</span></span><span style="display:flex;"><span>            &#34;--runroot&#34;,
+</span></span><span style="display:flex;"><span>            &#34;/run/user/1000/containers&#34;,
+</span></span><span style="display:flex;"><span>            &#34;--log-level&#34;,
+</span></span><span style="display:flex;"><span>            &#34;error&#34;,
+</span></span><span style="display:flex;"><span>            &#34;--cgroup-manager&#34;,
+</span></span><span style="display:flex;"><span>            &#34;cgroupfs&#34;,
+</span></span><span style="display:flex;"><span>            &#34;--tmpdir&#34;,
+</span></span><span style="display:flex;"><span>            &#34;/run/user/1000/libpod/tmp&#34;,
+</span></span><span style="display:flex;"><span>            &#34;--runtime&#34;,
+</span></span><span style="display:flex;"><span>            &#34;runc&#34;,
+</span></span><span style="display:flex;"><span>            &#34;--storage-driver&#34;,
+</span></span><span style="display:flex;"><span>            &#34;overlay&#34;,
+</span></span><span style="display:flex;"><span>            &#34;--storage-opt&#34;,
+</span></span><span style="display:flex;"><span>            &#34;overlay.mount_program=/usr/bin/fuse-overlayfs&#34;,
+</span></span><span style="display:flex;"><span>            &#34;--events-backend&#34;,
+</span></span><span style="display:flex;"><span>            &#34;journald&#34;,
+</span></span><span style="display:flex;"><span>            &#34;container&#34;,
+</span></span><span style="display:flex;"><span>            &#34;cleanup&#34;,
+</span></span><span style="display:flex;"><span>            &#34;aaef566e500973a2d4e9df22208e4a74ae5ea961083adbbe6bb6e98fbb19f7e7&#34;
+</span></span><span style="display:flex;"><span>        ],
+</span></span><span style="display:flex;"><span>        &#34;Namespace&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>        &#34;IsInfra&#34;: false,
+</span></span><span style="display:flex;"><span>        &#34;Config&#34;: {
+</span></span><span style="display:flex;"><span>            &#34;Hostname&#34;: &#34;aaef566e5009&#34;,
+</span></span><span style="display:flex;"><span>            &#34;Domainname&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>            &#34;User&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>            &#34;AttachStdin&#34;: false,
+</span></span><span style="display:flex;"><span>            &#34;AttachStdout&#34;: false,
+</span></span><span style="display:flex;"><span>            &#34;AttachStderr&#34;: false,
+</span></span><span style="display:flex;"><span>            &#34;Tty&#34;: false,
+</span></span><span style="display:flex;"><span>            &#34;OpenStdin&#34;: false,
+</span></span><span style="display:flex;"><span>            &#34;StdinOnce&#34;: false,
+</span></span><span style="display:flex;"><span>            &#34;Env&#34;: [
+</span></span><span style="display:flex;"><span>                &#34;PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin&#34;,
+</span></span><span style="display:flex;"><span>                &#34;TERM=xterm&#34;,
+</span></span><span style="display:flex;"><span>                &#34;container=podman&#34;,
+</span></span><span style="display:flex;"><span>                &#34;HOSTNAME=aaef566e5009&#34;,
+</span></span><span style="display:flex;"><span>                &#34;HOME=/root&#34;
+</span></span><span style="display:flex;"><span>            ],
+</span></span><span style="display:flex;"><span>            &#34;Cmd&#34;: [
+</span></span><span style="display:flex;"><span>                &#34;/usr/sbin/nginx&#34;
+</span></span><span style="display:flex;"><span>            ],
+</span></span><span style="display:flex;"><span>            &#34;Image&#34;: &#34;nginx&#34;,
+</span></span><span style="display:flex;"><span>            &#34;Volumes&#34;: null,
+</span></span><span style="display:flex;"><span>            &#34;WorkingDir&#34;: &#34;/&#34;,
+</span></span><span style="display:flex;"><span>            &#34;Entrypoint&#34;: &#34;/usr/local/bin/entrypoint.sh&#34;,
+</span></span><span style="display:flex;"><span>            &#34;OnBuild&#34;: null,
+</span></span><span style="display:flex;"><span>            &#34;Labels&#34;: {
+</span></span><span style="display:flex;"><span>                &#34;org.openbuildservice.disturl&#34;: &#34;obs://build.opensuse.org/openSUSE:Factory/images/d720a7068b306d15952c962f20a9524c-opensuse-nginx-image&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opencontainers.image.created&#34;: &#34;2021-01-30T17:23:14.138895035Z&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opencontainers.image.description&#34;: &#34;Image containing nginx as web server.&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opencontainers.image.title&#34;: &#34;openSUSE nginx web server container&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opencontainers.image.url&#34;: &#34;https://www.opensuse.org/&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opencontainers.image.vendor&#34;: &#34;openSUSE Project&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opencontainers.image.version&#34;: &#34;1.19.6-8.919&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opensuse.nginx.created&#34;: &#34;2021-01-30T17:23:14.138895035Z&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opensuse.nginx.description&#34;: &#34;Image containing nginx as web server.&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opensuse.nginx.disturl&#34;: &#34;obs://build.opensuse.org/openSUSE:Factory/images/d720a7068b306d15952c962f20a9524c-opensuse-nginx-image&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opensuse.nginx.reference&#34;: &#34;registry.opensuse.org/opensuse/nginx:1.19.6-8.919&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opensuse.nginx.title&#34;: &#34;openSUSE nginx web server container&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opensuse.nginx.version&#34;: &#34;1.19.6-8.919&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opensuse.reference&#34;: &#34;registry.opensuse.org/opensuse/nginx:1.19.6-8.919&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opensuse.tumbleweed.busybox.created&#34;: &#34;2021-01-30T17:00:57.705148070Z&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opensuse.tumbleweed.busybox.description&#34;: &#34;Small image containing busybox.&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opensuse.tumbleweed.busybox.disturl&#34;: &#34;obs://build.opensuse.org/openSUSE:Factory/images/e1deab10410717d6b30d6ff1940e1777-tumbleweed-busybox-image&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opensuse.tumbleweed.busybox.reference&#34;: &#34;registry.opensuse.org/opensuse/busybox:1.32.1-14.1&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opensuse.tumbleweed.busybox.title&#34;: &#34;openSUSE Busybox Container&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opensuse.tumbleweed.busybox.url&#34;: &#34;https://www.opensuse.org/&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opensuse.tumbleweed.busybox.vendor&#34;: &#34;openSUSE Project&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opensuse.tumbleweed.busybox.version&#34;: &#34;1.32.1-14.1&#34;
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>            &#34;Annotations&#34;: {
+</span></span><span style="display:flex;"><span>                &#34;io.container.manager&#34;: &#34;libpod&#34;,
+</span></span><span style="display:flex;"><span>                &#34;io.kubernetes.cri-o.Created&#34;: &#34;2021-02-05T12:52:23.83123341+07:00&#34;,
+</span></span><span style="display:flex;"><span>                &#34;io.kubernetes.cri-o.TTY&#34;: &#34;false&#34;,
+</span></span><span style="display:flex;"><span>                &#34;io.podman.annotations.autoremove&#34;: &#34;FALSE&#34;,
+</span></span><span style="display:flex;"><span>                &#34;io.podman.annotations.init&#34;: &#34;FALSE&#34;,
+</span></span><span style="display:flex;"><span>                &#34;io.podman.annotations.privileged&#34;: &#34;FALSE&#34;,
+</span></span><span style="display:flex;"><span>                &#34;io.podman.annotations.publish-all&#34;: &#34;FALSE&#34;,
+</span></span><span style="display:flex;"><span>                &#34;org.opencontainers.image.stopSignal&#34;: &#34;15&#34;
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>            &#34;StopSignal&#34;: 15,
+</span></span><span style="display:flex;"><span>            &#34;CreateCommand&#34;: [
+</span></span><span style="display:flex;"><span>                &#34;podman&#34;,
+</span></span><span style="display:flex;"><span>                &#34;run&#34;,
+</span></span><span style="display:flex;"><span>                &#34;-d&#34;,
+</span></span><span style="display:flex;"><span>                &#34;-p&#34;,
+</span></span><span style="display:flex;"><span>                &#34;8000:8000&#34;,
+</span></span><span style="display:flex;"><span>                &#34;nginx&#34;
+</span></span><span style="display:flex;"><span>            ],
+</span></span><span style="display:flex;"><span>            &#34;Umask&#34;: &#34;0022&#34;
+</span></span><span style="display:flex;"><span>        },
+</span></span><span style="display:flex;"><span>        &#34;HostConfig&#34;: {
+</span></span><span style="display:flex;"><span>            &#34;Binds&#34;: [
+</span></span><span style="display:flex;"><span>                &#34;c86360b3e3d6b0a0cdc60cf3cb4504a267933d154dae282a7caf760c7b599cdf:/data:rprivate,rw,nodev,exec,nosuid,rbind&#34;
+</span></span><span style="display:flex;"><span>            ],
+</span></span><span style="display:flex;"><span>            &#34;CgroupManager&#34;: &#34;cgroupfs&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CgroupMode&#34;: &#34;host&#34;,
+</span></span><span style="display:flex;"><span>            &#34;ContainerIDFile&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>            &#34;LogConfig&#34;: {
+</span></span><span style="display:flex;"><span>                &#34;Type&#34;: &#34;k8s-file&#34;,
+</span></span><span style="display:flex;"><span>                &#34;Config&#34;: null
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>            &#34;NetworkMode&#34;: &#34;slirp4netns&#34;,
+</span></span><span style="display:flex;"><span>            &#34;PortBindings&#34;: {
+</span></span><span style="display:flex;"><span>                &#34;8000/tcp&#34;: [
+</span></span><span style="display:flex;"><span>                    {
+</span></span><span style="display:flex;"><span>                        &#34;HostIp&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>                        &#34;HostPort&#34;: &#34;8000&#34;
+</span></span><span style="display:flex;"><span>                    }
+</span></span><span style="display:flex;"><span>                ]
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>            &#34;RestartPolicy&#34;: {
+</span></span><span style="display:flex;"><span>                &#34;Name&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>                &#34;MaximumRetryCount&#34;: 0
+</span></span><span style="display:flex;"><span>            },
+</span></span><span style="display:flex;"><span>            &#34;AutoRemove&#34;: false,
+</span></span><span style="display:flex;"><span>            &#34;VolumeDriver&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>            &#34;VolumesFrom&#34;: null,
+</span></span><span style="display:flex;"><span>            &#34;CapAdd&#34;: [],
+</span></span><span style="display:flex;"><span>            &#34;CapDrop&#34;: [],
+</span></span><span style="display:flex;"><span>            &#34;Dns&#34;: [],
+</span></span><span style="display:flex;"><span>            &#34;DnsOptions&#34;: [],
+</span></span><span style="display:flex;"><span>            &#34;DnsSearch&#34;: [],
+</span></span><span style="display:flex;"><span>            &#34;ExtraHosts&#34;: [],
+</span></span><span style="display:flex;"><span>            &#34;GroupAdd&#34;: [],
+</span></span><span style="display:flex;"><span>            &#34;IpcMode&#34;: &#34;private&#34;,
+</span></span><span style="display:flex;"><span>            &#34;Cgroup&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>            &#34;Cgroups&#34;: &#34;default&#34;,
+</span></span><span style="display:flex;"><span>            &#34;Links&#34;: null,
+</span></span><span style="display:flex;"><span>            &#34;OomScoreAdj&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;PidMode&#34;: &#34;private&#34;,
+</span></span><span style="display:flex;"><span>            &#34;Privileged&#34;: false,
+</span></span><span style="display:flex;"><span>            &#34;PublishAllPorts&#34;: false,
+</span></span><span style="display:flex;"><span>            &#34;ReadonlyRootfs&#34;: false,
+</span></span><span style="display:flex;"><span>            &#34;SecurityOpt&#34;: [],
+</span></span><span style="display:flex;"><span>            &#34;Tmpfs&#34;: {},
+</span></span><span style="display:flex;"><span>            &#34;UTSMode&#34;: &#34;private&#34;,
+</span></span><span style="display:flex;"><span>            &#34;UsernsMode&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>            &#34;ShmSize&#34;: 65536000,
+</span></span><span style="display:flex;"><span>            &#34;Runtime&#34;: &#34;oci&#34;,
+</span></span><span style="display:flex;"><span>            &#34;ConsoleSize&#34;: [
+</span></span><span style="display:flex;"><span>                0,
+</span></span><span style="display:flex;"><span>                0
+</span></span><span style="display:flex;"><span>            ],
+</span></span><span style="display:flex;"><span>            &#34;Isolation&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CpuShares&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;Memory&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;NanoCpus&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;CgroupParent&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>            &#34;BlkioWeight&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;BlkioWeightDevice&#34;: null,
+</span></span><span style="display:flex;"><span>            &#34;BlkioDeviceReadBps&#34;: null,
+</span></span><span style="display:flex;"><span>            &#34;BlkioDeviceWriteBps&#34;: null,
+</span></span><span style="display:flex;"><span>            &#34;BlkioDeviceReadIOps&#34;: null,
+</span></span><span style="display:flex;"><span>            &#34;BlkioDeviceWriteIOps&#34;: null,
+</span></span><span style="display:flex;"><span>            &#34;CpuPeriod&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;CpuQuota&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;CpuRealtimePeriod&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;CpuRealtimeRuntime&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;CpusetCpus&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>            &#34;CpusetMems&#34;: &#34;&#34;,
+</span></span><span style="display:flex;"><span>            &#34;Devices&#34;: [],
+</span></span><span style="display:flex;"><span>            &#34;DiskQuota&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;KernelMemory&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;MemoryReservation&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;MemorySwap&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;MemorySwappiness&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;OomKillDisable&#34;: false,
+</span></span><span style="display:flex;"><span>            &#34;PidsLimit&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;Ulimits&#34;: [],
+</span></span><span style="display:flex;"><span>            &#34;CpuCount&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;CpuPercent&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;IOMaximumIOps&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;IOMaximumBandwidth&#34;: 0,
+</span></span><span style="display:flex;"><span>            &#34;CgroupConf&#34;: null
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>]
+</span></span></code></pre></div><p><code>Podman inspect</code> literally covers everything that container is running with. Labels, mounts, volumes, exposed ports etc. Extremely useful for debugging and of course the output can be filtered. For more visit the <code>podman inspect</code> man page.</p>
+<p>The next useful tool to check what is happening real-time inside a container is <code>podman logs</code> which will output the <code>stdout</code> of the container. This can cover errors, warnings or general output information from the application inside the container.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-v" data-lang="v"><span style="display:flex;"><span><span style="color:#960050;background-color:#1e0010">$</span> podman logs admiring_franklin
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">48</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">909589</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> actions_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_actions.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">48</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">928259</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> alias_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_alias.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">48</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">937031</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> auth_basic_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_auth_basic.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">48</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">938069</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> authn_core_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_authn_core.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">48</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">946344</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> authn_file_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_authn_file.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">48</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">956344</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> authz_host_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_authz_host.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">48</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">974215</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> authz_groupfile_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_authz_groupfile.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">48</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">990336</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> authz_core_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_authz_core.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">48</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">991396</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> authz_user_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_authz_user.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">48</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">992640</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> autoindex_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_autoindex.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">48</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">995014</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> cgi_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_cgi.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">48</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">996348</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> dir_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_dir.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">49</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">003103</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> env_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_env.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">49</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">003674</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> expires_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_expires.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">49</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">004606</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> include_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_include.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">49</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">005130</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> log_config_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_log_config.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">49</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">018137</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> mime_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_mime.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">49</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">028327</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> negotiation_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_negotiation.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">49</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">036869</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> setenvif_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_setenvif.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">49</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">078484</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> ssl_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_ssl.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">49</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">081221</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> socache_shmcb_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_socache_shmcb.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">49</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">081547</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> userdir_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_userdir.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">49</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">082180</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> reqtimeout_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_reqtimeout.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">49</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">084216</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> rewrite_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_rewrite.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">49</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">089975</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> headers_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">-</span>prefork<span style="color:#f92672">/</span>mod_headers.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">49</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">135714</span> <span style="color:#a6e22e">2021</span>] [so:debug] [pid <span style="color:#ae81ff">10</span>] mod_so.<span style="color:#a6e22e">c</span>(<span style="color:#ae81ff">266</span>): <span style="color:#a6e22e">AH01575</span>: loaded <span style="color:#f92672">module</span> php7_module from <span style="color:#f92672">/</span>usr<span style="color:#f92672">/</span>lib64<span style="color:#f92672">/</span>apache2<span style="color:#f92672">/</span>mod_php7.so
+</span></span><span style="display:flex;"><span>[<span style="color:#a6e22e">Thu</span> <span style="color:#a6e22e">Feb</span> <span style="color:#a6e22e">04</span> <span style="color:#a6e22e">20</span>:<span style="color:#e6db74">30</span>:<span style="color:#e6db74">49</span><span style="color:#960050;background-color:#1e0010">.</span><span style="color:#a6e22e">430178</span> <span style="color:#a6e22e">2021</span>] [core:info] [pid <span style="color:#ae81ff">10</span>] <span style="color:#a6e22e">AH00545</span>: <span style="color:#a6e22e">MaxRequestsPerChild</span> <span style="color:#66d9ef">is</span> deprecated, use <span style="color:#a6e22e">MaxConnectionsPerChild</span> instead.
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">AH00558</span>: httpd<span style="color:#f92672">-</span>prefork: <span style="color:#a6e22e">Could</span> not reliably determine the server<span style="color:#e6db74">&#39;s fully qualified domain name, using 127.0.1.1. Set the &#39;</span><span style="color:#a6e22e">ServerName</span><span style="color:#e6db74">&#39; directive globally to suppress this message
+</span></span></span></code></pre></div><p>This can output a lot of information and it is rolling with the container&rsquo;s life cycle. To monitor the logs real-time as they come in - such as one would do with <code>tail -f</code> - you can do that with <code>podman logs -f</code> followed by the container&rsquo;s name or ID.</p>
+<h3 id="persistent-data">Persistent data</h3>
+<p>Containers are not able to store persistent data. If you need an application to store data between restarts and updates you need to either attach a <code>volume</code> or <code>mount</code> storage space outside of the container from the host system.</p>
+<h4 id="mounts">Mounts</h4>
+<p>Are basically can be anything, a file, a folder stored anywhere on the host system. This is not a storage space that is managed by Podman and can be accessed from the host system and from within the container as well. Creating a container with bind mount:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>$ podman run -it --name tw --mount type=bind,source=./binder,target=/mnt opensuse/tumbleweed /bin/bash                                                              
+</span></span><span style="display:flex;"><span># 8453197c43b9:/ # df -h
+</span></span><span style="display:flex;"><span>Filesystem           Size  Used Avail Use% Mounted on
+</span></span><span style="display:flex;"><span>fuse-overlayfs       231G   36G  195G  16% /
+</span></span><span style="display:flex;"><span>/dev/mapper/cr_root  231G   36G  195G  16% /mnt
+</span></span><span style="display:flex;"><span>tmpfs                 64M     0   64M   0% /dev
+</span></span><span style="display:flex;"><span>tmpfs                4.0M     0  4.0M   0% /sys/fs/cgroup
+</span></span><span style="display:flex;"><span>tmpfs                782M  374M  409M  48% /etc/hosts
+</span></span><span style="display:flex;"><span>shm                   63M     0   63M   0% /dev/shm
+</span></span><span style="display:flex;"><span>devtmpfs             3.9G     0  3.9G   0% /dev/tty
+</span></span><span style="display:flex;"><span>tmpfs                3.9G     0  3.9G   0% /sys/kernel
+</span></span><span style="display:flex;"><span>tmpfs                3.9G     0  3.9G   0% /proc/acpi
+</span></span><span style="display:flex;"><span>tmpfs                3.9G     0  3.9G   0% /proc/scsi
+</span></span><span style="display:flex;"><span>tmpfs                3.9G     0  3.9G   0% /sys/firmware
+</span></span><span style="display:flex;"><span>tmpfs                3.9G     0  3.9G   0% /sys/dev
+</span></span><span style="display:flex;"><span># 8453197c43b9:/ # cd /mnt/
+</span></span><span style="display:flex;"><span># 8453197c43b9:/mnt # ls
+</span></span><span style="display:flex;"><span># 8453197c43b9:/mnt # touch -a test
+</span></span><span style="display:flex;"><span># 8453197c43b9:/mnt # ls
+</span></span><span style="display:flex;"><span>test
+</span></span><span style="display:flex;"><span># 8453197c43b9:/mnt # exit
+</span></span><span style="display:flex;"><span>exit
+</span></span><span style="display:flex;"><span>$ cd binder                                                                                                                                                         
+</span></span><span style="display:flex;"><span>$ ls -a                                                                                                                                                                
+</span></span><span style="display:flex;"><span>total 0
+</span></span><span style="display:flex;"><span>drwxr-xr-x 1 apinter users  8 Feb  5 18:31 .
+</span></span><span style="display:flex;"><span>drwxr-xr-x 1 apinter users 32 Feb  5 17:58 ..
+</span></span><span style="display:flex;"><span>-rw-r--r-- 1 apinter users  0 Feb  5 18:31 test                                                                                                                        
+</span></span></code></pre></div><p>Breaking it down:</p>
+<ul>
+<li><code>podman run -it --name tw</code> will start a container in interactive mode and open a terminal (tty) inside the container which is named <code>tw</code>,</li>
+<li><code>--mount type=bind,source=./binder,target=/mnt</code> the <code>--mount</code> flag will tell Podman that we want to mount something from the host file system, the type is set to <code>bind</code> then with <code>source</code> set the path to the folder and with <code>target</code> set the path within the container where to mount it,</li>
+<li><code>opensuse/tumbleweed /bin/bash</code> defining the image - in this case openSUSE Tumbleweed - and what to run which will be the <code>bash</code> shell,</li>
+<li>Following that is a little proof-of-concept that the created file from within the container stay on the host file system after exiting.</li>
+</ul>
+<h4 id="volumes">Volumes</h4>
+<p>Volumes, unlike bind mounts are managed by Podman and this is the preferred way of having a persistent storage space attached to a container. If running a rootfull session the volume will be stored under <code>/var/lib/containers</code>, while rootless volumes will be stored under <code>~/.local/share/containers/storage</code>. To be able to attach volumes first need to create them with <code>podman volume create</code> and volumes can be listed with <code>podman volume list</code>. The volumes can be named and can have labels for meta information.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>$ podman volume create testvol                                                                                               
+</span></span><span style="display:flex;"><span>testvol
+</span></span><span style="display:flex;"><span>$ podman volume list                                                                                                        
+</span></span><span style="display:flex;"><span>DRIVER      VOLUME NAME
+</span></span><span style="display:flex;"><span>local       2508530e4332a17683c91aabd18e310607ac57b418da21900e72589c7285ed6f
+</span></span><span style="display:flex;"><span>local       49ad9d0c48db6b8b58a5434de01f2a1b0e2e29fef5ed4b8cf6f85cd11162e985
+</span></span><span style="display:flex;"><span>local       4e79dd89718157538f394e085021800e9f76720f45fed7763793b9cbd2092e4e
+</span></span><span style="display:flex;"><span>local       6c62ee3bc47ad16086cbc772e3dcb358229b2c56b1055167291d5a93bb2f9b4c
+</span></span><span style="display:flex;"><span>local       81d45f6f954fbb85fb4058394b5415c352b05358fc5ed2ae0d05b8ddb885d8d2
+</span></span><span style="display:flex;"><span>local       90d034f570fc7a8b2cb5592cd47a1183c24ff92b2c200e4a8e3a91ab5a70f1ed
+</span></span><span style="display:flex;"><span>local       a297bfa38aecb84775bcfd764dbdc1f885ba0c2d93cdf0ff9bc1e957de6fcef4
+</span></span><span style="display:flex;"><span>local       a6d423add657f0e5ad4ecb5d9c643d2df1ac3708ed433cf857a35b5d2879707a
+</span></span><span style="display:flex;"><span>local       c86360b3e3d6b0a0cdc60cf3cb4504a267933d154dae282a7caf760c7b599cdf
+</span></span><span style="display:flex;"><span>local       f6aec4ec8449c00c5c8f340634571f96befdda2f5c218fb93f2ee4bfb436154e
+</span></span><span style="display:flex;"><span>local       testvol
+</span></span></code></pre></div><p>Now mounting the created volume inside a container:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-fallback" data-lang="fallback"><span style="display:flex;"><span>$ podman run -it --name tw --mount type=volume,source=testvol,target=/mnt opensuse/tumbleweed /bin/bash                                                             
+</span></span><span style="display:flex;"><span># 03b1eb2c4b48:/ # df -h
+</span></span><span style="display:flex;"><span>Filesystem           Size  Used Avail Use% Mounted on
+</span></span><span style="display:flex;"><span>fuse-overlayfs       231G   36G  195G  16% /
+</span></span><span style="display:flex;"><span>tmpfs                 64M     0   64M   0% /dev
+</span></span><span style="display:flex;"><span>tmpfs                4.0M     0  4.0M   0% /sys/fs/cgroup
+</span></span><span style="display:flex;"><span>/dev/mapper/cr_root  231G   36G  195G  16% /mnt
+</span></span><span style="display:flex;"><span>tmpfs                782M  374M  408M  48% /etc/hosts
+</span></span><span style="display:flex;"><span>shm                   63M     0   63M   0% /dev/shm
+</span></span><span style="display:flex;"><span>devtmpfs             3.9G     0  3.9G   0% /dev/tty
+</span></span><span style="display:flex;"><span>tmpfs                3.9G     0  3.9G   0% /sys/kernel
+</span></span><span style="display:flex;"><span>tmpfs                3.9G     0  3.9G   0% /proc/acpi
+</span></span><span style="display:flex;"><span>tmpfs                3.9G     0  3.9G   0% /proc/scsi
+</span></span><span style="display:flex;"><span>tmpfs                3.9G     0  3.9G   0% /sys/firmware
+</span></span><span style="display:flex;"><span>tmpfs                3.9G     0  3.9G   0% /sys/dev
+</span></span><span style="display:flex;"><span># 03b1eb2c4b48:/ # cd /mnt 
+</span></span><span style="display:flex;"><span># 03b1eb2c4b48:/mnt # ls
+</span></span><span style="display:flex;"><span># 03b1eb2c4b48:/mnt # echo &#34;a message for the future&#34;&gt;&gt; testing
+</span></span><span style="display:flex;"><span># 03b1eb2c4b48:/mnt # ls
+</span></span><span style="display:flex;"><span>testing
+</span></span><span style="display:flex;"><span># 03b1eb2c4b48:/mnt # exit
+</span></span><span style="display:flex;"><span>exit
+</span></span><span style="display:flex;"><span>$ podman rm tw                                                                                                                                                      
+</span></span><span style="display:flex;"><span>03b1eb2c4b48d4badc17dfd8f25430afa2e5a32bb10f32e982a4deb86488f6de
+</span></span><span style="display:flex;"><span>$ podman run -it --name tw --mount type=volume,source=testvol,target=/mnt opensuse/tumbleweed /bin/bash                                                             
+</span></span><span style="display:flex;"><span># 1a203240e9d7:/ # df -h
+</span></span><span style="display:flex;"><span>Filesystem           Size  Used Avail Use% Mounted on
+</span></span><span style="display:flex;"><span>fuse-overlayfs       231G   36G  195G  16% /
+</span></span><span style="display:flex;"><span>tmpfs                 64M     0   64M   0% /dev
+</span></span><span style="display:flex;"><span>tmpfs                4.0M     0  4.0M   0% /sys/fs/cgroup
+</span></span><span style="display:flex;"><span>/dev/mapper/cr_root  231G   36G  195G  16% /mnt
+</span></span><span style="display:flex;"><span>tmpfs                782M  374M  408M  48% /etc/hosts
+</span></span><span style="display:flex;"><span>shm                   63M     0   63M   0% /dev/shm
+</span></span><span style="display:flex;"><span>devtmpfs             3.9G     0  3.9G   0% /dev/tty
+</span></span><span style="display:flex;"><span>tmpfs                3.9G     0  3.9G   0% /sys/kernel
+</span></span><span style="display:flex;"><span>tmpfs                3.9G     0  3.9G   0% /proc/acpi
+</span></span><span style="display:flex;"><span>tmpfs                3.9G     0  3.9G   0% /proc/scsi
+</span></span><span style="display:flex;"><span>tmpfs                3.9G     0  3.9G   0% /sys/firmware
+</span></span><span style="display:flex;"><span>tmpfs                3.9G     0  3.9G   0% /sys/dev
+</span></span><span style="display:flex;"><span># 1a203240e9d7:/ # cd /mnt/
+</span></span><span style="display:flex;"><span># 1a203240e9d7:/mnt # ls
+</span></span><span style="display:flex;"><span>testing
+</span></span><span style="display:flex;"><span># 1a203240e9d7:/mnt # cat testing
+</span></span><span style="display:flex;"><span>a message for the future
+</span></span><span style="display:flex;"><span># 1a203240e9d7:/mnt # exit
+</span></span><span style="display:flex;"><span>exit
+</span></span></code></pre></div><p>Breaking it down (the command is almost identical to the one used in <code>bind mount</code> so to keep it short will focus only the differences):</p>
+<ul>
+<li><code>--mount type=volume,source=testvol,target=/mnt</code> just like with <code>bind mounts</code> need to use the <code>--mount</code> flag, but the <code>type</code> will be <code>volume</code> and the <code>source</code> does not need the whole path just the name/id of the <code>volume</code>. Upon the creation of the volume if a name is not set a random one will be generated</li>
+<li>This is being followed by a proof-of-concept in which I created a container, mounted the volume, wrote a file and stored it in the volume then destroyed the container. Recreated it with the same command and <code>volume</code> and read out the files previously created inside the already destroyed container.
+For more visit the <code>podman volume</code> man page.</li>
+</ul>
+<h3 id="updating-containers">Updating containers</h3>
+<p>Can go about this a few different ways like pulling a container, launching it, mounting the necessary shares and config files and starting it on a different exposed port than the one we&rsquo;re planning to &ldquo;update&rdquo;. Once this is done, tested and works fine can just change the route to point to this updated container. Me being a lazy DevOps engineer I don&rsquo;t like this option so let&rsquo;s visit <code>podman auto-update</code>.</p>
+<h4 id="podman-auto-update">Podman auto-update</h4>
+<p>Before we go any further there are few things to make sure are set correctly on our container:</p>
+<ul>
+<li>there is no <code>--restart=always</code> flag present,</li>
+<li>the container is managed by <code>systemd</code>,</li>
+<li>the <code>systemd</code> unit has been generated by the container&rsquo;s ID not by it&rsquo;s name,</li>
+<li>the <code>systemd</code> unit has been generated with the <code>--new</code> flag.</li>
+</ul>
+<p>Podman&rsquo;s other important feature is the automatic updates of containers without the need of even putting containers in pods or adding a Watchtower service. This is done by adding the <code>--label io.containers.autoupdate=image</code> label during container creation. <br>
+This to be followed by generating <code>systemd</code> units for the container: <code>podman generate systemd --new --files [container ID or name]</code>. Once this is ready and the unit file is under the corresponding <code>systemd</code> folder - depending on how podman is used, rootfull or rootless - the container unit to be started. Following this the <code>podman auto-update</code> command can update every container with changed images.</p>
+<h4 id="podman-updater-script">Podman updater script</h4>
+<p>Got a little shell script that runs every day. This creates fresh builds of custom containers, pushes them to a private registry, pulls certain images and updates every container. This ran by a service unit that is triggered by a timer.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-bash" data-lang="bash"><span style="display:flex;"><span><span style="color:#75715e">#!/bin/bash
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>build_www<span style="color:#f92672">(){</span>
+</span></span><span style="display:flex;"><span>cd /home/podman_vol/dev/sx5/www; <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>podman build -t sx5-www .
+</span></span><span style="display:flex;"><span>podman push --authfile /root/.auth/auth.json sx5-www registry.s8i.io/transmission-app
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>build_db<span style="color:#f92672">(){</span>
+</span></span><span style="display:flex;"><span>cd /home/podman_vol/dev/sx5/sql; <span style="color:#ae81ff">\
+</span></span></span><span style="display:flex;"><span><span style="color:#ae81ff"></span>podman build -t mariadb-sx5 .
+</span></span><span style="display:flex;"><span>podman push --authfile /root/.auth/auth.json mariadb-sx5 registry.s8i.io/mariadb-sx5 
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>auto_update<span style="color:#f92672">(){</span>
+</span></span><span style="display:flex;"><span>podman auto-update
+</span></span><span style="display:flex;"><span><span style="color:#f92672">}</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>pull;
+</span></span><span style="display:flex;"><span>build_www;
+</span></span><span style="display:flex;"><span>build_db;
+</span></span><span style="display:flex;"><span>auto_update;
+</span></span></code></pre></div><h2 id="whats-next">What&rsquo;s next</h2>
+<p>Podman is a huge topic and this post is already fairly long, but covered just very little of it so this will be probably something ongoing what I&rsquo;m going to do. Probably visit networking, building custom containers maybe CI related topics.</p>
+<h2 id="references">References</h2>
+<p>I strongly suggest checking out the man pages of podman which provides a lot of information straight from the terminal. Also the following articles will help a lot on your podman journey:</p>
+<ul>
+<li><a href="https://www.redhat.com/sysadmin/compose-podman-pods">https://www.redhat.com/sysadmin/compose-podman-pods</a></li>
+<li><a href="https://www.redhat.com/sysadmin/rootless-podman-makes-sense">https://www.redhat.com/sysadmin/rootless-podman-makes-sense</a></li>
+<li><a href="https://www.redhat.com/sysadmin/behind-scenes-podman">https://www.redhat.com/sysadmin/behind-scenes-podman</a></li>
+<li><a href="https://www.redhat.com/sysadmin/user-flag-rootless-containers">https://www.redhat.com/sysadmin/user-flag-rootless-containers</a></li>
+<li><a href="https://www.redhat.com/en/blog/understanding-root-inside-and-outside-container">https://www.redhat.com/en/blog/understanding-root-inside-and-outside-container</a></li>
+<li><a href="https://developers.redhat.com/blog/2019/01/15/podman-managing-containers-pods/">https://developers.redhat.com/blog/2019/01/15/podman-managing-containers-pods/</a></li>
+<li><a href="https://developers.redhat.com/blog/2019/04/24/how-to-run-systemd-in-a-container/">https://developers.redhat.com/blog/2019/04/24/how-to-run-systemd-in-a-container/</a></li>
+<li><a href="https://github.com/containers/podman/blob/master/docs/tutorials/rootless_tutorial.md">https://github.com/containers/podman/blob/master/docs/tutorials/rootless_tutorial.md</a></li>
+</ul>
+
+		</section>
+
+		<div class="post-tags">
+			
+			
+			<nav class="nav tags">
+				<ul class="tags">
+					
+					<li><a href="/tags/podman">Podman</a></li>
+					
+					<li><a href="/tags/container">container</a></li>
+					
+					<li><a href="/tags/automation">automation</a></li>
+					
+				</ul>
+			</nav>
+			
+			
+		</div>
+	</article>
+</main>
+<footer>
+<hr><a class="soc" href="https://github.com/apinter" title="GitHub"><i data-feather="github"></i></a>|<a class="soc" href="https://twitter.com/adathorium" title="Twitter"><i data-feather="twitter"></i></a>|⚡️
+	2023  GNU FDL 1.3 |  Built with <a href="https://gohugo.io">Hugo</a> and the <a href="https://github.com/athul/archie">Archie Theme</a> | 
+</footer>
+
+
+<script>
+      feather.replace()
+</script></div>
+    </body>
+</html>
