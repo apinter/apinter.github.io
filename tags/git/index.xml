@@ -2,18 +2,18 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>git on YAL/TB</title>
-    <link>https://apinter.github.io/tags/git/</link>
+    <link>https://blog.adathor.com/tags/git/</link>
     <description>Recent content in git on YAL/TB</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>GNU FDL 1.3</copyright>
-    <lastBuildDate>Wed, 03 Feb 2021 10:16:19 +0700</lastBuildDate><atom:link href="https://apinter.github.io/tags/git/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Wed, 03 Feb 2021 10:16:19 +0700</lastBuildDate><atom:link href="https://blog.adathor.com/tags/git/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Syncing a fork with upstream</title>
-      <link>https://apinter.github.io/posts/git-sync-upstream-fork/</link>
+      <link>https://blog.adathor.com/posts/git-sync-upstream-fork/</link>
       <pubDate>Wed, 03 Feb 2021 10:16:19 +0700</pubDate>
       
-      <guid>https://apinter.github.io/posts/git-sync-upstream-fork/</guid>
+      <guid>https://blog.adathor.com/posts/git-sync-upstream-fork/</guid>
       <description>Getting started By now you&amp;rsquo;re probably familiar with git. Git is a popular distributed version control system with which people can collaborate on pretty much anything that you can/want to version control and collaborate on. This can be source code, documentation, automation scripts, anything really. To work on a project with others, one would generally create a fork of the main repository where the code, it&amp;rsquo;s branches and issues are being stored at.</description>
     </item>
     
