@@ -10,7 +10,7 @@ pygmentscodefencesguesssyntax = true
 	mode="dark"
 	useCDN=false
 	subtitle = "Yet Another Linux/Tech Blog - mostly my notes though"
-
+	favicon = "favicon.ico"
 [[params.social]]
 name = "GitHub"
 icon = "github"
