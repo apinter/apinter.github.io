@@ -14,7 +14,10 @@ Forked from [Ezhil Theme](https://github.com/vividvilla/ezhil)
 - Callouts
 - Tags
 - Auto Dark Mode(based on system theme)
+- Dark/Light Mode toggle
 - tl:dr; frontamatter
+- Cache busting for CSS files
+- Disqus Comments
 
 ## Installation
 In your Hugo website directory, create a new folder named theme and clone the repo
@@ -24,7 +27,7 @@ $ cd themes
 $ git clone https://github.com/athul/archie.git
 ```
 Edit the `config.toml` file with `theme="archie"`
-For more information read the official [setup guide](https://gohugo.io/overview/installing/) of Hugo.
+For more information read the official [setup guide](https://gohugo.io/installation/) of Hugo.
 
 ## Writing Posts
 Create a new `.md` file in the *content/posts* folder
@@ -40,10 +43,23 @@ tags: [tag names] (optional)
 ```
 
 ## Credits
-Forked from [Ezhil Theme](https://github.com/vividvilla/ezhil) and Licensed under MIT License 
+Forked from [Ezhil Theme](https://github.com/vividvilla/ezhil) and Licensed under MIT License
 Inspired by design of blog.jse.li
 
 ----
+
+## Config Options
+
+### Custom CSS
+Custom CSS files can be included though the `customcss` config parameter.
+
+Note: CSS files should be placed under the `assets` directory e.g. `assets/css/first.css`.
+
+```toml
+[params]
+	customcss = ["css/first.css", "css/second.css"]
+```
+
 
 ## Config of the Demo Site
 
@@ -58,12 +74,16 @@ pygmentsstyle = "monokai"
 pygmentscodefences = true
 pygmentscodefencesguesssyntax = true
 
+disqusShortname = "yourDisqusShortname"
+
 paginate=3 # articles per page
 
 [params]
-	mode="auto" # color-mode → light,dark or auto
+	mode="auto" # color-mode → light,dark,toggle or auto
 	useCDN=false # don't use CDNs for fonts and icons, instead serve them locally.
 	subtitle = "Minimal and Clean [blog theme for Hugo](https://github.com/athul/archie)"
+	mathjax = true # enable MathJax support
+	katex = true # enable KaTeX support
 
 # Social Tags
 
@@ -104,3 +124,8 @@ name = "Tags"
 url = "/tags"
 weight = 4
 ```
+---
+
+If you liked my work please consider supporting me on [BuymeACoffee](https://www.buymeacoffee.com/athulca)
+
+<a href="https://www.buymeacoffee.com/athulca" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-red.png" alt="Buy Me A Coffee" height="41" width="174" ></a>
