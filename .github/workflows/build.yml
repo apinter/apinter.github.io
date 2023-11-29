@@ -1,0 +1,41 @@
+name: Build blog.adathor.com
+on:
+  push:
+    branches:
+      - src
+  pull_request:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest 
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Checkout destination
+        uses: actions/checkout@v3
+        if: github.ref == 'refs/heads/src'
+        with:
+          ref: main
+          path: pages-blog
+          
+      - name: Setup Hugo
+        run: |
+          curl -L -o /tmp/hugo.tar.gz 'https://github.com/gohugoio/hugo/releases/download/v0.120.4/hugo_extended_0.120.4_linux-amd64.tar.gz'
+          tar -C ${RUNNER_TEMP} -zxvf /tmp/hugo.tar.gz hugo
+
+      - name: Build
+        run: ${RUNNER_TEMP}/hugo
+
+      - name: Deploy
+        if: github.ref == 'refs/heads/src'
+        run: |
+          cp -R public/* ${GITHUB_WORKSPACE}/pages-blog/
+          cd ${GITHUB_WORKSPACE}/pages-blog
+          git add .
+          git config user.name 'gh-action'
+          git config user.email 'adathor@opensuse.org'
+          git commit -m 'Update blog'
+          git push
