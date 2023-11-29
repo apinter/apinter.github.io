@@ -7,16 +7,15 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>GNU FDL 1.3</copyright>
-    <lastBuildDate>Sun, 31 Jan 2021 19:33:46 +0700</lastBuildDate><atom:link href="https://blog.adathor.com/tags/first/index.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sun, 31 Jan 2021 19:33:46 +0700</lastBuildDate>
+    <atom:link href="https://blog.adathor.com/tags/first/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Initial Commit</title>
       <link>https://blog.adathor.com/posts/initial-commit/</link>
       <pubDate>Sun, 31 Jan 2021 19:33:46 +0700</pubDate>
-      
       <guid>https://blog.adathor.com/posts/initial-commit/</guid>
       <description>Purpose First of all this a GNU/Linux - and mostly openSUSE - focused technical blog with a bunch of know-how, tools, personal recommendations. Recently had this realization that the content I&amp;rsquo;m keeping in my QOwnNotes would be a little bit more valuable if&amp;hellip;
 ..it would be available publicly, ..it would be DDG/Google searchable, ..I could just link to it when I&amp;rsquo;m helping others AkA &amp;ldquo;laziness&amp;rdquo;. Being active in different communities, I run into a lot of repeated questions.</description>
     </item>
-    
   </channel>
 </rss>
