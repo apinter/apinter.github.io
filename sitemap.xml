@@ -3,7 +3,22 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://blog.adathor.com/</loc>
-    <lastmod>2021-08-11T19:18:55+07:00</lastmod>
+    <lastmod>2023-11-29T18:38:10+07:00</lastmod>
+  </url><url>
+    <loc>https://blog.adathor.com/tags/help/</loc>
+    <lastmod>2023-11-29T18:38:10+07:00</lastmod>
+  </url><url>
+    <loc>https://blog.adathor.com/tags/link-collection/</loc>
+    <lastmod>2023-11-29T18:38:10+07:00</lastmod>
+  </url><url>
+    <loc>https://blog.adathor.com/links/</loc>
+    <lastmod>2023-11-29T18:38:10+07:00</lastmod>
+  </url><url>
+    <loc>https://blog.adathor.com/tags/</loc>
+    <lastmod>2023-11-29T18:38:10+07:00</lastmod>
+  </url><url>
+    <loc>https://blog.adathor.com/tags/useful/</loc>
+    <lastmod>2023-11-29T18:38:10+07:00</lastmod>
   </url><url>
     <loc>https://blog.adathor.com/tags/keynote/</loc>
     <lastmod>2021-08-11T19:18:55+07:00</lastmod>
@@ -21,9 +36,6 @@
     <lastmod>2021-08-11T19:18:55+07:00</lastmod>
   </url><url>
     <loc>https://blog.adathor.com/posts/</loc>
-    <lastmod>2021-08-11T19:18:55+07:00</lastmod>
-  </url><url>
-    <loc>https://blog.adathor.com/tags/</loc>
     <lastmod>2021-08-11T19:18:55+07:00</lastmod>
   </url><url>
     <loc>https://blog.adathor.com/tags/container/</loc>
