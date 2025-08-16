@@ -1,58 +1,261 @@
+
+
 <!DOCTYPE html>
-<html><head>
-	<meta charset="utf-8" />
-	<meta http-equiv="X-UA-Compatible" content="IE=edge"><title>Syncing a fork with upstream - YAL/TB</title><meta name="viewport" content="width=device-width, initial-scale=1">
+<html lang="en" itemscope itemtype="http://schema.org/WebPage">
+  <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+    
 
-	<meta property="og:image" content=""/>
-	<meta property="og:title" content="Syncing a fork with upstream" />
-<meta property="og:description" content="Getting started By now you&rsquo;re probably familiar with git. Git is a popular distributed version control system with which people can collaborate on pretty much anything that you can/want to version control and collaborate on. This can be source code, documentation, automation scripts, anything really. To work on a project with others, one would generally create a fork of the main repository where the code, it&rsquo;s branches and issues are being stored at." />
-<meta property="og:type" content="article" />
-<meta property="og:url" content="https://apinter.github.io/posts/git-sync-upstream-fork/" />
-<meta property="article:published_time" content="2021-02-03T10:16:19+07:00" />
-<meta property="article:modified_time" content="2021-02-03T10:16:19+07:00" />
-<meta name="twitter:card" content="summary"/>
-<meta name="twitter:title" content="Syncing a fork with upstream"/>
-<meta name="twitter:description" content="Getting started By now you&rsquo;re probably familiar with git. Git is a popular distributed version control system with which people can collaborate on pretty much anything that you can/want to version control and collaborate on. This can be source code, documentation, automation scripts, anything really. To work on a project with others, one would generally create a fork of the main repository where the code, it&rsquo;s branches and issues are being stored at."/>
-<script src="https://apinter.github.io/js/feather.min.js"></script>
-	
-	<link href="https://apinter.github.io/css/fonts.css" rel="stylesheet">
-	
-	<link rel="stylesheet" type="text/css" media="screen" href="https://apinter.github.io/css/main.css" /><link rel="stylesheet" type="text/css" href="https://apinter.github.io/css/dark.css"  />
-	
-	
-</head>
-<body>
-        <div class="content"><header>
-	<div class="main">
-		<a href="https://apinter.github.io/">YAL/TB</a>
-	</div>
-	<nav>
-		
-		<a href="/">Home</a>
-		
-		<a href="/posts">All posts</a>
-		
-		<a href="/about">About</a>
-		
-		<a href="/tags">Tags</a>
-		
-	</nav>
-</header>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
-<main>
-	<article>
-		<div class="title">
-			<h1 class="title">Syncing a fork with upstream</h1>
-			<div class="meta">Posted on Feb 3, 2021</div>
-		</div>
-		
-		<div class="tldr">
-			<strong>tl;dr:</strong>
-			Configure a remote for a fork by adding the upstream `git remote add upstream https://github.com/ORIGINAL_OWNER/ORIGINAL_REPOSITORY.git` then make sure the remote has been added by listing remotes `git remote -v`. Fetch the branches and commits from upstream `git fetch upstream`, checkout to your forks default branch and merge the changes &#39;git checkout main&#39; and &#39;git merge upstream/main&#39;.
-		</div>
+ 
 
-		<section class="body">
-			<h2 id="getting-started">Getting started</h2>
+
+      <title>Syncing a fork with upstream - </title>
+
+  <meta name="description" content="Getting started
+By now you&rsquo;re probably familiar with git. Git is a popular distributed version control system with which people can collaborate on pretty much anything that you can/want to version control and collaborate on. This can be source code, documentation, automation scripts, anything really. To work on a project with others, one would generally create a fork of the main repository where the code, it&rsquo;s branches and issues are being stored at. This short article explains what to do when the upstream project pulls too far ahead that it leaves your fork out-of-date creating potential issues during a pull request (PR) which would have to be resolved by the person who the PR is assigned to.">
+  <meta name="author" content="Attila Pinter - Adathor"/><script type="application/ld+json">
+{
+    "@context": "http://schema.org",
+    "@type": "WebSite",
+    "name": "YAL\/TB",
+    
+    "url": "http:\/\/172.168.30.25:1313\/"
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Organization",
+  "name": "",
+  "url": "http:\/\/172.168.30.25:1313\/"
+  
+  
+  
+  
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+        "@type": "ListItem",
+        "position": 1,
+        "item": {
+          "@id": "http:\/\/172.168.30.25:1313\/",
+          "name": "home"
+        }
+    },{
+        "@type": "ListItem",
+        "position": 3,
+        "item": {
+          "@id": "http:\/\/172.168.30.25:1313\/posts\/git-sync-upstream-fork\/",
+          "name": "Syncing a fork with upstream"
+        }
+    }]
+}
+</script><script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "Article",
+  "author": {
+    "name" : "Attila Pinter - Adathor"
+  },
+  "headline": "Syncing a fork with upstream",
+  "description" : "Getting started By now you\u0026rsquo;re probably familiar with git. Git is a popular distributed version control system with which people can collaborate on pretty much anything that you can\/want to version control and collaborate on. This can be source code, documentation, automation scripts, anything really. To work on a project with others, one would generally create a fork of the main repository where the code, it\u0026rsquo;s branches and issues are being stored at. This short article explains what to do when the upstream project pulls too far ahead that it leaves your fork out-of-date creating potential issues during a pull request (PR) which would have to be resolved by the person who the PR is assigned to.\n",
+  "inLanguage" : "en",
+  "wordCount":  322 ,
+  "datePublished" : "2021-02-03T10:16:19\u002b07:00",
+  "dateModified" : "2021-02-03T10:16:19\u002b07:00",
+  "image" : "http:\/\/172.168.30.25:1313\/img\/adathor.png",
+  "keywords" : [ "git, fork, workflow" ],
+  "mainEntityOfPage" : "http:\/\/172.168.30.25:1313\/posts\/git-sync-upstream-fork\/",
+  "publisher" : {
+    "@type": "Organization",
+    "name" : "http:\/\/172.168.30.25:1313\/",
+    "logo" : {
+        "@type" : "ImageObject",
+        "url" : "http:\/\/172.168.30.25:1313\/img\/adathor.png",
+        "height" :  60 ,
+        "width" :  60
+    }
+  }
+}
+</script>
+
+
+<meta property="og:title" content="Syncing a fork with upstream" />
+<meta property="og:description" content="Getting started
+By now you&rsquo;re probably familiar with git. Git is a popular distributed version control system with which people can collaborate on pretty much anything that you can/want to version control and collaborate on. This can be source code, documentation, automation scripts, anything really. To work on a project with others, one would generally create a fork of the main repository where the code, it&rsquo;s branches and issues are being stored at. This short article explains what to do when the upstream project pulls too far ahead that it leaves your fork out-of-date creating potential issues during a pull request (PR) which would have to be resolved by the person who the PR is assigned to.">
+<meta property="og:image" content="http://172.168.30.25:1313/img/adathor.png" />
+<meta property="og:url" content="http://172.168.30.25:1313/posts/git-sync-upstream-fork/" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="YAL/TB" />
+
+  <meta name="twitter:title" content="Syncing a fork with upstream" />
+  <meta name="twitter:description" content="Getting started
+By now you&rsquo;re probably familiar with git. Git is a popular distributed version control system with which people can collaborate on pretty much anything that you can/want to …">
+  <meta name="twitter:image" content="http://172.168.30.25:1313/img/adathor.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <link href='http://172.168.30.25:1313/img/favicon.ico' rel='icon' type='image/x-icon'/>
+  <meta name="generator" content="Hugo 0.148.2">
+  <link rel="alternate" href="http://172.168.30.25:1313/index.xml" type="application/rss+xml" title="YAL/TB"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.css" integrity="sha384-3UiQGuEI4TTMaFmGIZumfRPtfKQ3trwQE2JgosJxCnGmQpL/lJdjpcHkaaFwHlcI" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.6.0/css/all.css" integrity="sha384-h/hnnw1Bi4nbpD6kE7nYfCXzovi622sY5WBxww8ARKwpdLj5kUWjRuyiXaD1U2JT" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/css/bootstrap.min.css" integrity="sha384-HSMxcRTRxnN+Bdg0JdbxYKrThecOKuH5zCYotlSAcp1+c8xmyTe9GYg1l9a69psu" crossorigin="anonymous"><link rel="stylesheet" href="http://172.168.30.25:1313/css/main.css" /><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" /><link rel="stylesheet" href="http://172.168.30.25:1313/css/syntax.css" /><link rel="stylesheet" href="http://172.168.30.25:1313/css/codeblock.css" /><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css" integrity="sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css" integrity="sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R" crossorigin="anonymous">
+
+  </head>
+  <body>
+    <nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+  <div class="container-fluid">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="http://172.168.30.25:1313/">YAL/TB</a>
+    </div>
+
+    <div class="collapse navbar-collapse" id="main-navbar">
+      <ul class="nav navbar-nav navbar-right">
+        
+          
+            <li>
+              <a title="Blog" href="/">Blog</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="About" href="/page/about/">About</a>
+            </li>
+          
+        
+          
+            <li>
+              <a title="Tags" href="/tags">Tags</a>
+            </li>
+          
+        
+
+        
+
+        
+      </ul>
+    </div>
+
+    
+      <div class="avatar-container">
+        <div class="avatar-img-border">
+          <a title="YAL/TB" href="http://172.168.30.25:1313/">
+            <img class="avatar-img" src="http://172.168.30.25:1313/img/adathor.png" alt="YAL/TB" />
+           
+          </a>
+        </div>
+      </div>
+    
+
+  </div>
+</nav>
+
+
+
+
+    
+
+
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+<div class="pswp__bg"></div>
+
+<div class="pswp__scroll-wrap">
+    
+    <div class="pswp__container">
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+      <div class="pswp__item"></div>
+    </div>
+    
+    <div class="pswp__ui pswp__ui--hidden">
+    <div class="pswp__top-bar">
+      
+      <div class="pswp__counter"></div>
+      <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+      <button class="pswp__button pswp__button--share" title="Share"></button>
+      <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+      <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+      
+      
+      <div class="pswp__preloader">
+        <div class="pswp__preloader__icn">
+          <div class="pswp__preloader__cut">
+            <div class="pswp__preloader__donut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+      <div class="pswp__share-tooltip"></div>
+    </div>
+    <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+    </button>
+    <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+    </button>
+    <div class="pswp__caption">
+      <div class="pswp__caption__center"></div>
+    </div>
+    </div>
+    </div>
+</div>
+
+
+  
+  
+  
+
+
+
+
+
+
+  
+
+  <header class="header-section ">
+    
+    
+    <div class="intro-header no-img">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+            <div class="posts-heading">
+              
+                <h1>Syncing a fork with upstream</h1>
+              
+              
+                <hr class="small">
+              
+              
+              
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+  </header>
+
+
+    
+<div class="container" role="main">
+  <div class="row">
+    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+      <article role="main" class="blog-post">
+        <h2 id="getting-started">Getting started</h2>
 <p>By now you&rsquo;re probably familiar with <code>git</code>. Git is a popular distributed version control system with which people can collaborate on pretty much anything that you can/want to version control and collaborate on. This can be source code, documentation, automation scripts, anything really. To work on a project with others, one would generally create a fork of the main repository where the code, it&rsquo;s branches and issues are being stored at. This short article explains what to do when the upstream project pulls too far ahead that it leaves your fork out-of-date creating potential issues during a pull request (PR) which would have to be resolved by the person who the PR is assigned to.</p>
 <p>What you need:</p>
 <ol>
@@ -65,74 +268,212 @@
 <ol>
 <li>List the currently configured remotes for your project.</li>
 </ol>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">$ git remote -v
+<pre tabindex="0"><code>$ git remote -v
 origin  git@github.com:USERNAME/FORK.git (fetch)
 origin  git@github.com:USERNAME/FORK.git (push)
-</code></pre></div><ol start="2">
+</code></pre><ol start="2">
 <li>Add a new remote <em>upstream</em> repositroy that you will sync with your fork.</li>
 </ol>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">$ git remote add upstream https://github.com/ORIGINAL_OWNER/ORIGINAL_REPOSITORY.git
-</code></pre></div><ol start="3">
+<pre tabindex="0"><code>$ git remote add upstream https://github.com/ORIGINAL_OWNER/ORIGINAL_REPOSITORY.git
+</code></pre><ol start="3">
 <li>Make sure that the remote has been added.</li>
 </ol>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">$ git remote -v
+<pre tabindex="0"><code>$ git remote -v
 &gt; origin    https://github.com/USERNAME/FORK.git (fetch)
 &gt; origin    https://github.com/USERNAME/FORK.git (push)
 &gt; upstream  https://github.com/ORIGINAL_OWNER/ORIGINAL_REPOSITORY.git (fetch)
 &gt; upstream  https://github.com/ORIGINAL_OWNER/ORIGINAL_REPOSITORY.git (push)
  
-</code></pre></div><ol start="4">
+</code></pre><ol start="4">
 <li>Fetch the upstream branches and commits.</li>
 </ol>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">$ git fetch upstream
+<pre tabindex="0"><code>$ git fetch upstream
 &gt; remote: Counting objects: 75, done.
 &gt; remote: Compressing objects: 100% (53/53), done.
 &gt; remote: Total 62 (delta 27), reused 44 (delta 9)
 &gt; Unpacking objects: 100% (62/62), done.
 &gt; From https://github.com/ORIGINAL_OWNER/ORIGINAL_REPOSITORY
 &gt;  * [new branch]      main     -&gt; upstream/main
-</code></pre></div><ol start="5">
+</code></pre><ol start="5">
 <li>Check out you fork&rsquo;s default branch.</li>
 </ol>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">$ git checkout main 
+<pre tabindex="0"><code>$ git checkout main 
 Switched to branch &#39;main&#39;
 Your branch is up to date with &#39;origin/main&#39;.
-</code></pre></div><ol start="6">
+</code></pre><ol start="6">
 <li>Merge the upstream changes to your local fork&rsquo;s main repository.</li>
 </ol>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-fallback" data-lang="fallback">$ git merge upstream/main
-</code></pre></div><h2 id="conclusion">Conclusion</h2>
+<pre tabindex="0"><code>$ git merge upstream/main
+</code></pre><h2 id="conclusion">Conclusion</h2>
 <p>With these few steps you can keep your fork up-to-date with the upstream project hopefully causing less overhead to the upstream maintainers.</p>
 
-		</section>
 
-		<div class="post-tags">
-			
-			
-			<nav class="nav tags">
-				<ul class="tags">
-					
-					<li><a href="/tags/git">git</a></li>
-					
-					<li><a href="/tags/fork">fork</a></li>
-					
-					<li><a href="/tags/workflow">workflow</a></li>
-					
-				</ul>
-			</nav>
-			
-			
-		</div>
-	</article>
-</main>
-<footer>
-<hr><a class="soc" href="https://github.com/apinter" title="GitHub"><i data-feather="github"></i></a>|<a class="soc" href="https://twitter.com/adathorium" title="Twitter"><i data-feather="twitter"></i></a>|⚡️
-	2021  GNU FDL 1.3 |  Built with <a href="https://gohugo.io">Hugo</a> and the <a href="https://github.com/athul/archie">Archie Theme</a> | 
-</footer>
+        
+          <div class="blog-tags">
+            
+              
+              <a href="http://172.168.30.25:1313/tags/git/">git</a>&nbsp;
+            
+              
+              <a href="http://172.168.30.25:1313/tags/fork/">fork</a>&nbsp;
+            
+              
+              <a href="http://172.168.30.25:1313/tags/workflow/">workflow</a>&nbsp;
+            
+          </div>
+        
+
+        
+
+        
+          
+
+          
+        
+      </article>
+
+      
+        <ul class="pager blog-pager">
+          
+            <li class="previous">
+              <a href="http://172.168.30.25:1313/posts/initial-commit/" data-toggle="tooltip" data-placement="top" title="Initial Commit">&larr; Previous Post</a>
+            </li>
+          
+          
+            <li class="next">
+              <a href="http://172.168.30.25:1313/posts/podman/" data-toggle="tooltip" data-placement="top" title="Podman quick start">Next Post &rarr;</a>
+            </li>
+          
+        </ul>
+      
 
 
-<script>
-      feather.replace()
-</script></div>
-    </body>
+      
+      
+      
+      
+      
+        
+      
+
+    </div>
+  </div>
+</div>
+
+      <footer>
+  <div class="container">
+    
+    <div class="row">
+      <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+        <ul class="list-inline text-center footer-links">
+          
+              <li>
+		
+		  <a href="mailto:adathor@opensuse.org" title="Email me">
+		
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fas fa-envelope fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+		
+		  <a href="https://github.com/apinter" title="GitHub">
+		
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-github fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+		
+		  <a href="https://adathor.slack.com/" title="Slack">
+		
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-slack fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+		
+		  <a href="https://reddit.com/u/adathor" title="Reddit">
+		
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-reddit-alien fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+		
+		  <a href="https://www.youtube.com/@attilapinter7141" title="Youtube">
+		
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-youtube fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+              <li>
+		
+		  <a rel="me"href="https://infosec.exchange/@adathor" title="Mastodon">
+		
+                  <span class="fa-stack fa-lg">
+                    <i class="fas fa-circle fa-stack-2x"></i>
+                    <i class="fab fa-mastodon fa-stack-1x fa-inverse"></i>
+                  </span>
+                </a>
+              </li>
+          
+          
+          
+        </ul>
+        <p class="credits copyright text-muted">
+          
+            
+              <a href="adathor.com">Attila Pinter - Adathor</a>
+            
+          
+
+          &nbsp;&bull;&nbsp;&copy;
+          
+            2021
+          
+
+          
+            &nbsp;&bull;&nbsp;
+            <a href="http://172.168.30.25:1313/">YAL/TB</a>
+          
+        </p>
+        
+        <p class="credits theme-by text-muted">
+          <a href="https://gohugo.io">Hugo v0.148.2</a> powered &nbsp;&bull;&nbsp; Theme <a href="https://github.com/halogenica/beautifulhugo">Beautiful Hugo</a> adapted from <a href="https://deanattali.com/beautiful-jekyll/">Beautiful Jekyll</a>
+          
+        </p>
+      </div>
+    </div>
+  </div>
+</footer><script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/katex.min.js" integrity="sha384-G0zcxDFp5LWZtDuRMnBkk3EphCK1lhEf4UEyEM693ka574TZGwo4IWwS6QLzM/2t" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.7/dist/contrib/auto-render.min.js" integrity="sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05" crossorigin="anonymous" onload="renderMathInElement(document.body);"></script>
+<script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" integrity="sha384-w5y/xIeYixWvfM+A1cEbmHPURnvyqmVg5eVENruEdDjcyRLUSNej7512JQGspFUr" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@3.4.1/dist/js/bootstrap.min.js" integrity="sha384-aJ21OjlMXNL5UyIl/XNwTMqvzeRMZH2w8c5cRVpzpU8Y5bApTppSuUkhZXN0VxHd" crossorigin="anonymous"></script>
+
+<script src="http://172.168.30.25:1313/js/main.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js" integrity="sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js" integrity="sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q" crossorigin="anonymous"></script><script src="http://172.168.30.25:1313/js/load-photoswipe.js"></script>
+
+
+
+
+
+
+
+
+
+
+    
+  </body>
 </html>
+

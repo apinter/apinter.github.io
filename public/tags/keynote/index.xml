@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Keynote on YAL/TB</title>
+    <link>http://172.168.30.25:1313/tags/keynote/</link>
+    <description>Recent content in Keynote on YAL/TB</description>
+    <generator>Hugo</generator>
+    <language>en</language>
+    <managingEditor>adathor@opensuse.org (Attila Pinter - Adathor)</managingEditor>
+    <webMaster>adathor@opensuse.org (Attila Pinter - Adathor)</webMaster>
+    <lastBuildDate>Wed, 11 Aug 2021 19:18:55 +0700</lastBuildDate>
+    <atom:link href="http://172.168.30.25:1313/tags/keynote/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>MicroOS for DevOps and automation</title>
+      <link>http://172.168.30.25:1313/posts/osavs21_microos/</link>
+      <pubDate>Wed, 11 Aug 2021 19:18:55 +0700</pubDate><author>adathor@opensuse.org (Attila Pinter - Adathor)</author>
+      <guid>http://172.168.30.25:1313/posts/osavs21_microos/</guid>
+      <description>&lt;p&gt;My talk took place at  openSUSE.Asia Virtual Summit 2021 August 08, 2021. During this talk I was sharing some information as how we at OpenStorage.io are utilizing GitlabCI, Ansible and MicroOS to achive some DevOpsie automation to make our life a lot easier. Enjoy! (click pic)&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://www.youtube.com/watch?v=wlTi_7gikzU&#34; title=&#34;openSUSE MicroOS DevOps&#34;&gt;&lt;img src=&#34;../img/microos_dev_osc.png&#34; alt=&#34;MicroOS and DevOps at OSC&#34;&gt;&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;Note: The pipeline has a bug cause I mixed &lt;code&gt;zypper&lt;/code&gt; and &lt;code&gt;apt&lt;/code&gt;, but it is fixed in the slides in &lt;a href=&#34;https://github.com/apinter/oSAVS21-microOS&#34;&gt;my Github repo&lt;/a&gt;&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
