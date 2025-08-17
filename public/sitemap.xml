@@ -2,75 +2,78 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>https://blog.adathor.com/</loc>
+    <loc>http://0.0.0.0:1313/</loc>
     <lastmod>2021-08-11T19:18:55+07:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/tags/keynote/</loc>
+    <loc>http://0.0.0.0:1313/tags/keynote/</loc>
     <lastmod>2021-08-11T19:18:55+07:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/tags/microos/</loc>
+    <loc>http://0.0.0.0:1313/tags/microos/</loc>
     <lastmod>2021-08-11T19:18:55+07:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/posts/osavs21_microos/</loc>
+    <loc>http://0.0.0.0:1313/posts/osavs21_microos/</loc>
     <lastmod>2021-08-11T19:18:55+07:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/tags/openstorage/</loc>
+    <loc>http://0.0.0.0:1313/tags/openstorage/</loc>
     <lastmod>2021-08-11T19:18:55+07:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/tags/opensuse/</loc>
+    <loc>http://0.0.0.0:1313/tags/opensuse/</loc>
     <lastmod>2021-08-11T19:18:55+07:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/posts/</loc>
+    <loc>http://0.0.0.0:1313/posts/</loc>
     <lastmod>2021-08-11T19:18:55+07:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/tags/</loc>
+    <loc>http://0.0.0.0:1313/tags/</loc>
     <lastmod>2021-08-11T19:18:55+07:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/tags/container/</loc>
+    <loc>http://0.0.0.0:1313/tags/container/</loc>
     <lastmod>2021-02-20T04:55:04+07:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/tags/migration/</loc>
+    <loc>http://0.0.0.0:1313/tags/migration/</loc>
     <lastmod>2021-02-20T04:55:04+07:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/tags/podman/</loc>
+    <loc>http://0.0.0.0:1313/tags/podman/</loc>
     <lastmod>2021-02-20T04:55:04+07:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/posts/podman-checkpoint-restore-btrfs/</loc>
+    <loc>http://0.0.0.0:1313/posts/podman-checkpoint-restore-btrfs/</loc>
     <lastmod>2021-02-20T04:55:04+07:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/tags/automation/</loc>
+    <loc>http://0.0.0.0:1313/tags/automation/</loc>
     <lastmod>2021-02-10T09:38:16+07:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/posts/podman/</loc>
+    <loc>http://0.0.0.0:1313/posts/podman/</loc>
     <lastmod>2021-02-10T09:38:16+07:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/tags/fork/</loc>
+    <loc>http://0.0.0.0:1313/tags/fork/</loc>
     <lastmod>2021-02-03T10:16:19+07:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/tags/git/</loc>
+    <loc>http://0.0.0.0:1313/tags/git/</loc>
     <lastmod>2021-02-03T10:16:19+07:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/posts/git-sync-upstream-fork/</loc>
+    <loc>http://0.0.0.0:1313/posts/git-sync-upstream-fork/</loc>
     <lastmod>2021-02-03T10:16:19+07:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/tags/workflow/</loc>
+    <loc>http://0.0.0.0:1313/tags/workflow/</loc>
     <lastmod>2021-02-03T10:16:19+07:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/tags/first/</loc>
+    <loc>http://0.0.0.0:1313/tags/first/</loc>
     <lastmod>2021-01-31T19:33:46+07:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/posts/initial-commit/</loc>
+    <loc>http://0.0.0.0:1313/posts/initial-commit/</loc>
     <lastmod>2021-01-31T19:33:46+07:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/tags/todo/</loc>
+    <loc>http://0.0.0.0:1313/tags/todo/</loc>
     <lastmod>2021-01-31T19:33:46+07:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/about/</loc>
+    <loc>http://0.0.0.0:1313/page/about/</loc>
     <lastmod>2021-01-31T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/archives/</loc>
+    <loc>http://0.0.0.0:1313/page/</loc>
+    <lastmod>2021-01-31T00:00:00+00:00</lastmod>
+  </url><url>
+    <loc>http://0.0.0.0:1313/archives/</loc>
     <lastmod>2019-05-28T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>https://blog.adathor.com/categories/</loc>
+    <loc>http://0.0.0.0:1313/categories/</loc>
   </url>
 </urlset>

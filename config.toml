@@ -1,0 +1,59 @@
+baseurl = "https://apinter.github.io"
+DefaultContentLanguage = "en"
+title = "YAL/TB"
+theme = "beautifulhugo"
+# pygmentsStyle = "github-dark"
+# pygmentsUseClasses = true
+# pygmentsCodeFences = true
+# pygmentsCodefencesGuessSyntax = true
+# pygmentsUseClassic = true
+# pygmentOptions = "linenos=inline"
+
+[Services]
+  [Services.Disqus]
+    # Shortname = "XXX"
+  [Services.googleAnalytics]
+    # id = "XXX"
+
+[Params]
+  subtitle = "Just my notes really."
+  mainSections = ["post","posts"]
+  logo = "img/adathor.png" # Expecting square dimensions
+  favicon = "img/favicon.ico"
+  dateFormat = "January 2, 2006"
+  commit = false
+  rss = true
+  comments = true
+  readingTime = true
+  wordCount = true
+  useHLJS = false 
+  socialShare = false 
+  delayDisqus = false
+  showRelatedPosts = true
+
+[[Params.bigimg]]
+ # src = "img/term.jpg"
+  src = "img/title.jpg"
+  position = "center"
+
+[Params.author]
+  name = "Attila Pinter - Adathor"
+  website = "adathor.com"
+  email = "adathor@adathor.com"
+  github = "apinter"
+  mastodon = "https://infosec.exchange/@adathor"
+
+[[menu.main]]
+    name = "Blog"
+    url = ""
+    weight = 1
+
+[[menu.main]]
+    name = "About"
+    url = "page/about/"
+    weight = 2
+
+[[menu.main]]
+    name = "Tags"
+    url = "tags"
+    weight = 3
