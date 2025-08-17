@@ -2,103 +2,103 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Tags on YAL/TB</title>
-    <link>https://apinter.github.io/tags/</link>
+    <link>https://blog.adathor.com/tags/</link>
     <description>Recent content in Tags on YAL/TB</description>
     <generator>Hugo</generator>
     <language>en</language>
     <managingEditor>adathor@adathor.com (Attila Pinter - Adathor)</managingEditor>
     <webMaster>adathor@adathor.com (Attila Pinter - Adathor)</webMaster>
     <lastBuildDate>Wed, 11 Aug 2021 19:18:55 +0700</lastBuildDate>
-    <atom:link href="https://apinter.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://blog.adathor.com/tags/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Keynote</title>
-      <link>https://apinter.github.io/tags/keynote/</link>
+      <link>https://blog.adathor.com/tags/keynote/</link>
       <pubDate>Wed, 11 Aug 2021 19:18:55 +0700</pubDate><author>adathor@adathor.com (Attila Pinter - Adathor)</author>
-      <guid>https://apinter.github.io/tags/keynote/</guid>
+      <guid>https://blog.adathor.com/tags/keynote/</guid>
       <description></description>
     </item>
     <item>
       <title>MicroOS</title>
-      <link>https://apinter.github.io/tags/microos/</link>
+      <link>https://blog.adathor.com/tags/microos/</link>
       <pubDate>Wed, 11 Aug 2021 19:18:55 +0700</pubDate><author>adathor@adathor.com (Attila Pinter - Adathor)</author>
-      <guid>https://apinter.github.io/tags/microos/</guid>
+      <guid>https://blog.adathor.com/tags/microos/</guid>
       <description></description>
     </item>
     <item>
       <title>OpenStorage</title>
-      <link>https://apinter.github.io/tags/openstorage/</link>
+      <link>https://blog.adathor.com/tags/openstorage/</link>
       <pubDate>Wed, 11 Aug 2021 19:18:55 +0700</pubDate><author>adathor@adathor.com (Attila Pinter - Adathor)</author>
-      <guid>https://apinter.github.io/tags/openstorage/</guid>
+      <guid>https://blog.adathor.com/tags/openstorage/</guid>
       <description></description>
     </item>
     <item>
       <title>OpenSUSE</title>
-      <link>https://apinter.github.io/tags/opensuse/</link>
+      <link>https://blog.adathor.com/tags/opensuse/</link>
       <pubDate>Wed, 11 Aug 2021 19:18:55 +0700</pubDate><author>adathor@adathor.com (Attila Pinter - Adathor)</author>
-      <guid>https://apinter.github.io/tags/opensuse/</guid>
+      <guid>https://blog.adathor.com/tags/opensuse/</guid>
       <description></description>
     </item>
     <item>
       <title>Container</title>
-      <link>https://apinter.github.io/tags/container/</link>
+      <link>https://blog.adathor.com/tags/container/</link>
       <pubDate>Sat, 20 Feb 2021 04:55:04 +0700</pubDate><author>adathor@adathor.com (Attila Pinter - Adathor)</author>
-      <guid>https://apinter.github.io/tags/container/</guid>
+      <guid>https://blog.adathor.com/tags/container/</guid>
       <description></description>
     </item>
     <item>
       <title>Migration</title>
-      <link>https://apinter.github.io/tags/migration/</link>
+      <link>https://blog.adathor.com/tags/migration/</link>
       <pubDate>Sat, 20 Feb 2021 04:55:04 +0700</pubDate><author>adathor@adathor.com (Attila Pinter - Adathor)</author>
-      <guid>https://apinter.github.io/tags/migration/</guid>
+      <guid>https://blog.adathor.com/tags/migration/</guid>
       <description></description>
     </item>
     <item>
       <title>Podman</title>
-      <link>https://apinter.github.io/tags/podman/</link>
+      <link>https://blog.adathor.com/tags/podman/</link>
       <pubDate>Sat, 20 Feb 2021 04:55:04 +0700</pubDate><author>adathor@adathor.com (Attila Pinter - Adathor)</author>
-      <guid>https://apinter.github.io/tags/podman/</guid>
+      <guid>https://blog.adathor.com/tags/podman/</guid>
       <description></description>
     </item>
     <item>
       <title>Automation</title>
-      <link>https://apinter.github.io/tags/automation/</link>
+      <link>https://blog.adathor.com/tags/automation/</link>
       <pubDate>Wed, 10 Feb 2021 09:38:16 +0700</pubDate><author>adathor@adathor.com (Attila Pinter - Adathor)</author>
-      <guid>https://apinter.github.io/tags/automation/</guid>
+      <guid>https://blog.adathor.com/tags/automation/</guid>
       <description></description>
     </item>
     <item>
       <title>Fork</title>
-      <link>https://apinter.github.io/tags/fork/</link>
+      <link>https://blog.adathor.com/tags/fork/</link>
       <pubDate>Wed, 03 Feb 2021 10:16:19 +0700</pubDate><author>adathor@adathor.com (Attila Pinter - Adathor)</author>
-      <guid>https://apinter.github.io/tags/fork/</guid>
+      <guid>https://blog.adathor.com/tags/fork/</guid>
       <description></description>
     </item>
     <item>
       <title>Git</title>
-      <link>https://apinter.github.io/tags/git/</link>
+      <link>https://blog.adathor.com/tags/git/</link>
       <pubDate>Wed, 03 Feb 2021 10:16:19 +0700</pubDate><author>adathor@adathor.com (Attila Pinter - Adathor)</author>
-      <guid>https://apinter.github.io/tags/git/</guid>
+      <guid>https://blog.adathor.com/tags/git/</guid>
       <description></description>
     </item>
     <item>
       <title>Workflow</title>
-      <link>https://apinter.github.io/tags/workflow/</link>
+      <link>https://blog.adathor.com/tags/workflow/</link>
       <pubDate>Wed, 03 Feb 2021 10:16:19 +0700</pubDate><author>adathor@adathor.com (Attila Pinter - Adathor)</author>
-      <guid>https://apinter.github.io/tags/workflow/</guid>
+      <guid>https://blog.adathor.com/tags/workflow/</guid>
       <description></description>
     </item>
     <item>
       <title>First</title>
-      <link>https://apinter.github.io/tags/first/</link>
+      <link>https://blog.adathor.com/tags/first/</link>
       <pubDate>Sun, 31 Jan 2021 19:33:46 +0700</pubDate><author>adathor@adathor.com (Attila Pinter - Adathor)</author>
-      <guid>https://apinter.github.io/tags/first/</guid>
+      <guid>https://blog.adathor.com/tags/first/</guid>
       <description></description>
     </item>
     <item>
       <title>Todo</title>
-      <link>https://apinter.github.io/tags/todo/</link>
+      <link>https://blog.adathor.com/tags/todo/</link>
       <pubDate>Sun, 31 Jan 2021 19:33:46 +0700</pubDate><author>adathor@adathor.com (Attila Pinter - Adathor)</author>
-      <guid>https://apinter.github.io/tags/todo/</guid>
+      <guid>https://blog.adathor.com/tags/todo/</guid>
       <description></description>
     </item>
   </channel>

@@ -2,12 +2,12 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Categories on YAL/TB</title>
-    <link>https://apinter.github.io/categories/</link>
+    <link>https://blog.adathor.com/categories/</link>
     <description>Recent content in Categories on YAL/TB</description>
     <generator>Hugo</generator>
     <language>en</language>
     <managingEditor>adathor@adathor.com (Attila Pinter - Adathor)</managingEditor>
     <webMaster>adathor@adathor.com (Attila Pinter - Adathor)</webMaster>
-    <atom:link href="https://apinter.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://blog.adathor.com/categories/index.xml" rel="self" type="application/rss+xml" />
   </channel>
 </rss>

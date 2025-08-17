@@ -2,47 +2,47 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Posts on YAL/TB</title>
-    <link>https://apinter.github.io/posts/</link>
+    <link>https://blog.adathor.com/posts/</link>
     <description>Recent content in Posts on YAL/TB</description>
     <generator>Hugo</generator>
     <language>en</language>
     <managingEditor>adathor@adathor.com (Attila Pinter - Adathor)</managingEditor>
     <webMaster>adathor@adathor.com (Attila Pinter - Adathor)</webMaster>
     <lastBuildDate>Wed, 11 Aug 2021 19:18:55 +0700</lastBuildDate>
-    <atom:link href="https://apinter.github.io/posts/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://blog.adathor.com/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>MicroOS for DevOps and automation</title>
-      <link>https://apinter.github.io/posts/osavs21_microos/</link>
+      <link>https://blog.adathor.com/posts/osavs21_microos/</link>
       <pubDate>Wed, 11 Aug 2021 19:18:55 +0700</pubDate><author>adathor@adathor.com (Attila Pinter - Adathor)</author>
-      <guid>https://apinter.github.io/posts/osavs21_microos/</guid>
+      <guid>https://blog.adathor.com/posts/osavs21_microos/</guid>
       <description>&lt;p&gt;My talk took place at  openSUSE.Asia Virtual Summit 2021 August 08, 2021. During this talk I was sharing some information as how we at OpenStorage.io are utilizing GitlabCI, Ansible and MicroOS to achive some DevOpsie automation to make our life a lot easier. Enjoy! (click pic)&lt;/p&gt;&#xA;&lt;p&gt;&lt;a href=&#34;https://www.youtube.com/watch?v=wlTi_7gikzU&#34; title=&#34;openSUSE MicroOS DevOps&#34;&gt;&lt;img src=&#34;../img/microos_dev_osc.png&#34; alt=&#34;MicroOS and DevOps at OSC&#34;&gt;&lt;/a&gt;&lt;/p&gt;&#xA;&lt;p&gt;Note: The pipeline has a bug cause I mixed &lt;code&gt;zypper&lt;/code&gt; and &lt;code&gt;apt&lt;/code&gt;, but it is fixed in the slides in &lt;a href=&#34;https://github.com/apinter/oSAVS21-microOS&#34;&gt;my Github repo&lt;/a&gt;&lt;/p&gt;</description>
     </item>
     <item>
       <title>Podman checkpoint/restore on btrfs</title>
-      <link>https://apinter.github.io/posts/podman-checkpoint-restore-btrfs/</link>
+      <link>https://blog.adathor.com/posts/podman-checkpoint-restore-btrfs/</link>
       <pubDate>Sat, 20 Feb 2021 04:55:04 +0700</pubDate><author>adathor@adathor.com (Attila Pinter - Adathor)</author>
-      <guid>https://apinter.github.io/posts/podman-checkpoint-restore-btrfs/</guid>
+      <guid>https://blog.adathor.com/posts/podman-checkpoint-restore-btrfs/</guid>
       <description>&lt;h2 id=&#34;podman-checkpointrestore-in-userspace&#34;&gt;Podman Checkpoint/Restore in Userspace&lt;/h2&gt;&#xA;&lt;p&gt;Recently I was migrating our entire Podman infra to a new, bigger server, roughly ~180 container. Most of our things are running in &lt;code&gt;pods&lt;/code&gt; which are fairly easy to migrate, just &lt;code&gt;podman generate kube --filename xyz.yml xyz-pod&lt;/code&gt;, clean up the yml a bit and on the new server I just &lt;em&gt;play&lt;/em&gt; it with &lt;code&gt;podman play xyz.yml&lt;/code&gt;. Done, pod migrated.&#xA;On the other hand we have a few containers that are running outside of pods and was interested how lazy I can get with those using Podman. Fairly quickly ran into &lt;code&gt;Podman Checkpoints/Restore in Userspace (CRIU)&lt;/code&gt;.&#xA;With CRIU Podman is able to checkpoint and restore containers in their &lt;strong&gt;current state&lt;/strong&gt;. Migration is just one use-case, another would be to restore a container after a host reboot exactly the way it was prior the restart. This is exactly what I needed, scripts back in the box, in the new and shiny stuff comes.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Podman quick start</title>
-      <link>https://apinter.github.io/posts/podman/</link>
+      <link>https://blog.adathor.com/posts/podman/</link>
       <pubDate>Wed, 10 Feb 2021 09:38:16 +0700</pubDate><author>adathor@adathor.com (Attila Pinter - Adathor)</author>
-      <guid>https://apinter.github.io/posts/podman/</guid>
+      <guid>https://blog.adathor.com/posts/podman/</guid>
       <description>&lt;h2 id=&#34;what-is-podman&#34;&gt;What is Podman&lt;/h2&gt;&#xA;&lt;p&gt;Podman is a a daemonless, open-source tool to manage, deploy and build application containers. Podman is using Open Containers Initiative (OCI) Containers and container images, which means that containers crated with/for Docker or CRI-o will work with Podman as well and vice versa. It is coming with a command line interface (CLI) which offers pretty much the same commands like Docker does. How similar are Podman commands to Docker&amp;rsquo;s? Let&amp;rsquo;s put it this way: many Podman users just alias &lt;code&gt;docker&lt;/code&gt; to &lt;code&gt;podman&lt;/code&gt;. Like other runtimes, Podman also relies on an OCI compliant container runtime to interface with the operating system. Podamn also has a RESTful API to manage containers, offers automatic updates of containers and has a fantastic &lt;code&gt;systemd&lt;/code&gt; integration.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Syncing a fork with upstream</title>
-      <link>https://apinter.github.io/posts/git-sync-upstream-fork/</link>
+      <link>https://blog.adathor.com/posts/git-sync-upstream-fork/</link>
       <pubDate>Wed, 03 Feb 2021 10:16:19 +0700</pubDate><author>adathor@adathor.com (Attila Pinter - Adathor)</author>
-      <guid>https://apinter.github.io/posts/git-sync-upstream-fork/</guid>
+      <guid>https://blog.adathor.com/posts/git-sync-upstream-fork/</guid>
       <description>&lt;h2 id=&#34;getting-started&#34;&gt;Getting started&lt;/h2&gt;&#xA;&lt;p&gt;By now you&amp;rsquo;re probably familiar with &lt;code&gt;git&lt;/code&gt;. Git is a popular distributed version control system with which people can collaborate on pretty much anything that you can/want to version control and collaborate on. This can be source code, documentation, automation scripts, anything really. To work on a project with others, one would generally create a fork of the main repository where the code, it&amp;rsquo;s branches and issues are being stored at. This short article explains what to do when the upstream project pulls too far ahead that it leaves your fork out-of-date creating potential issues during a pull request (PR) which would have to be resolved by the person who the PR is assigned to.&lt;/p&gt;</description>
     </item>
     <item>
       <title>Initial Commit</title>
-      <link>https://apinter.github.io/posts/initial-commit/</link>
+      <link>https://blog.adathor.com/posts/initial-commit/</link>
       <pubDate>Sun, 31 Jan 2021 19:33:46 +0700</pubDate><author>adathor@adathor.com (Attila Pinter - Adathor)</author>
-      <guid>https://apinter.github.io/posts/initial-commit/</guid>
+      <guid>https://blog.adathor.com/posts/initial-commit/</guid>
       <description>&lt;h2 id=&#34;purpose&#34;&gt;Purpose&lt;/h2&gt;&#xA;&lt;p&gt;First of all this a GNU/Linux - and mostly openSUSE - focused technical blog with a bunch of know-how, tools, personal recommendations. Recently had this realization that the content I&amp;rsquo;m keeping in my QOwnNotes would be a little bit more valuable if&amp;hellip;&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;..it would be available publicly,&lt;/li&gt;&#xA;&lt;li&gt;..it would be DDG/Google searchable,&lt;/li&gt;&#xA;&lt;li&gt;..I could just link to it when I&amp;rsquo;m helping others AkA &amp;ldquo;laziness&amp;rdquo;.&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;Being active in different communities, I run into a lot of repeated questions. How to do this, how to do that, what would be an ideal setup for &lt;em&gt;xyz&lt;/em&gt;. So instead of searching for the answer in &lt;strong&gt;QOwnNotes&lt;/strong&gt; or in the messaging history I could just send a link to the corresponding entry here.&lt;/p&gt;</description>
     </item>
   </channel>
