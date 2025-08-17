@@ -1,4 +1,4 @@
-baseurl = "https://apinter.github.io"
+baseurl = "https://blog.adathor.com"
 DefaultContentLanguage = "en"
 title = "YAL/TB"
 theme = "beautifulhugo"
