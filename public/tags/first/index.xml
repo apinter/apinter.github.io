@@ -6,14 +6,14 @@
     <description>Recent content in First on YAL/TB</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <managingEditor>adathor@opensuse.org (Attila Pinter - Adathor)</managingEditor>
-    <webMaster>adathor@opensuse.org (Attila Pinter - Adathor)</webMaster>
+    <managingEditor>adathor@adathor.com (Attila Pinter - Adathor)</managingEditor>
+    <webMaster>adathor@adathor.com (Attila Pinter - Adathor)</webMaster>
     <lastBuildDate>Sun, 31 Jan 2021 19:33:46 +0700</lastBuildDate>
     <atom:link href="http://172.168.30.25:1313/tags/first/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Initial Commit</title>
       <link>http://172.168.30.25:1313/posts/initial-commit/</link>
-      <pubDate>Sun, 31 Jan 2021 19:33:46 +0700</pubDate><author>adathor@opensuse.org (Attila Pinter - Adathor)</author>
+      <pubDate>Sun, 31 Jan 2021 19:33:46 +0700</pubDate><author>adathor@adathor.com (Attila Pinter - Adathor)</author>
       <guid>http://172.168.30.25:1313/posts/initial-commit/</guid>
       <description>&lt;h2 id=&#34;purpose&#34;&gt;Purpose&lt;/h2&gt;&#xA;&lt;p&gt;First of all this a GNU/Linux - and mostly openSUSE - focused technical blog with a bunch of know-how, tools, personal recommendations. Recently had this realization that the content I&amp;rsquo;m keeping in my QOwnNotes would be a little bit more valuable if&amp;hellip;&lt;/p&gt;&#xA;&lt;ul&gt;&#xA;&lt;li&gt;..it would be available publicly,&lt;/li&gt;&#xA;&lt;li&gt;..it would be DDG/Google searchable,&lt;/li&gt;&#xA;&lt;li&gt;..I could just link to it when I&amp;rsquo;m helping others AkA &amp;ldquo;laziness&amp;rdquo;.&lt;/li&gt;&#xA;&lt;/ul&gt;&#xA;&lt;p&gt;Being active in different communities, I run into a lot of repeated questions. How to do this, how to do that, what would be an ideal setup for &lt;em&gt;xyz&lt;/em&gt;. So instead of searching for the answer in &lt;strong&gt;QOwnNotes&lt;/strong&gt; or in the messaging history I could just send a link to the corresponding entry here.&lt;/p&gt;</description>
     </item>

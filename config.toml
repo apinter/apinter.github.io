@@ -32,17 +32,16 @@ theme = "beautifulhugo"
   showRelatedPosts = true
 
 [[Params.bigimg]]
- src = "img/term.jpg"
+ # src = "img/term.jpg"
+  src = "img/title.jpg"
+  position = "center"
 
 [Params.author]
   name = "Attila Pinter - Adathor"
   website = "adathor.com"
-  email = "adathor@opensuse.org"
+  email = "adathor@adathor.com"
   github = "apinter"
-  reddit = "adathor"
-  youtube = "@attilapinter7141" 
   mastodon = "https://infosec.exchange/@adathor"
-  slack = "adathor"
 
 [[menu.main]]
     name = "Blog"

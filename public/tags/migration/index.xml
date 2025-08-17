@@ -6,14 +6,14 @@
     <description>Recent content in Migration on YAL/TB</description>
     <generator>Hugo</generator>
     <language>en</language>
-    <managingEditor>adathor@opensuse.org (Attila Pinter - Adathor)</managingEditor>
-    <webMaster>adathor@opensuse.org (Attila Pinter - Adathor)</webMaster>
+    <managingEditor>adathor@adathor.com (Attila Pinter - Adathor)</managingEditor>
+    <webMaster>adathor@adathor.com (Attila Pinter - Adathor)</webMaster>
     <lastBuildDate>Sat, 20 Feb 2021 04:55:04 +0700</lastBuildDate>
     <atom:link href="http://172.168.30.25:1313/tags/migration/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>Podman checkpoint/restore on btrfs</title>
       <link>http://172.168.30.25:1313/posts/podman-checkpoint-restore-btrfs/</link>
-      <pubDate>Sat, 20 Feb 2021 04:55:04 +0700</pubDate><author>adathor@opensuse.org (Attila Pinter - Adathor)</author>
+      <pubDate>Sat, 20 Feb 2021 04:55:04 +0700</pubDate><author>adathor@adathor.com (Attila Pinter - Adathor)</author>
       <guid>http://172.168.30.25:1313/posts/podman-checkpoint-restore-btrfs/</guid>
       <description>&lt;h2 id=&#34;podman-checkpointrestore-in-userspace&#34;&gt;Podman Checkpoint/Restore in Userspace&lt;/h2&gt;&#xA;&lt;p&gt;Recently I was migrating our entire Podman infra to a new, bigger server, roughly ~180 container. Most of our things are running in &lt;code&gt;pods&lt;/code&gt; which are fairly easy to migrate, just &lt;code&gt;podman generate kube --filename xyz.yml xyz-pod&lt;/code&gt;, clean up the yml a bit and on the new server I just &lt;em&gt;play&lt;/em&gt; it with &lt;code&gt;podman play xyz.yml&lt;/code&gt;. Done, pod migrated.&#xA;On the other hand we have a few containers that are running outside of pods and was interested how lazy I can get with those using Podman. Fairly quickly ran into &lt;code&gt;Podman Checkpoints/Restore in Userspace (CRIU)&lt;/code&gt;.&#xA;With CRIU Podman is able to checkpoint and restore containers in their &lt;strong&gt;current state&lt;/strong&gt;. Migration is just one use-case, another would be to restore a container after a host reboot exactly the way it was prior the restart. This is exactly what I needed, scripts back in the box, in the new and shiny stuff comes.&lt;/p&gt;</description>
     </item>
