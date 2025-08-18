@@ -33,7 +33,7 @@ theme = "beautifulhugo"
 
 [[Params.bigimg]]
  # src = "img/term.jpg"
-  src = "img/title.jpg"
+  src = "img/title.webp"
   position = "center"
 
 [Params.author]
