@@ -154,7 +154,7 @@ This tells SOPS to use the AGE keys on the Yubikeys. Both regex rules here match
 
 ## Encrypting and decrypting files
 
-SOPS shines with structured formats like YAML/JSON, where you can encrypt individual fields. That’s nice, but in my case I just want **binary in/out**. That’s where the `--input-type` and `--output-type` flags are handy.
+SOPS shines with structured formats like YAML/JSON, where I can encrypt individual fields. That’s nice, but in my case I just want **binary in/out**. That’s where the `--input-type` and `--output-type` flags are handy.
 
 Encrypt a file:
 
@@ -170,7 +170,92 @@ SOPS_AGE_KEY_FILE=$PWD/sops_vault sops --decrypt --input-type binary --in-place 
 
 Here, `SOPS_AGE_KEY_FILE` points to the file with my Yubikey keys, so SOPS knows how to decrypt. The `--in-place` flag updates the file directly. Without it, SOPS just prints the decrypted content to stdout — useful if I just need to quickly grab my master password.
 
----
+## Finalizing the setup
+
+This is all great, but I currently I have about 30 different files in this vault, and I really don't feel like typing these commands individually every time I need to access something, or if I want to run the backup job for my password manager. To get around this issue, I've created a script that can handle both encryption and decryption in one go for all files in the vault and individual files as well. I have created a "register" file that contains the list of files I want to encrypt/decrypt, and the script will read from this file and process each entry accordingly.
+
+The script is as follows:
+
+```bash
+#!/bin/bash
+
+set -e
+
+if [ "$#" -lt 2 ]; then
+  echo "Error: Invalid number of arguments." >&2
+  exit 1
+fi
+
+COMMAND="$1"
+shift
+
+case "$COMMAND" in
+
+encrypt)
+  for file in "$@"; do
+    if [ ! -f "$file" ]; then
+      echo "Error: File not found at '$file'. Skipping." >&2
+      continue
+    fi
+    echo "Encrypting '$file' in-place..." >&2
+    sops --encrypt --input-type binary --output-type binary --in-place "$file"
+    echo "Encryption of '$file' complete." >&2
+  done
+  ;;
+
+decrypt)
+  for file in "$@"; do
+    if [ ! -f "$file" ]; then
+      echo "Error: File not found at '$file'. Skipping." >&2
+      continue
+    fi
+    SOPS_AGE_KEY_FILE=$PWD/identity sops --decrypt --input-type binary "$file"
+  done
+  ;;
+
+decrypt-inplace)
+  for file in "$@"; do
+    if [ ! -f "$file" ]; then
+      echo "Error: File not found at '$file'. Skipping." >&2
+      continue
+    fi
+    SOPS_AGE_KEY_FILE=$PWD/identity sops --decrypt --input-type binary --output-type binary --in-place "$file"
+  done
+  ;;
+
+*)
+  echo "Error: Unknown command '$COMMAND'." >&2
+  exit 1
+  ;;
+esac
+```
+
+This handles the encryption which is always destructive. The decryption can be a non-destructive way when called with the `decrypt` option in which case it will print the decrypted content to stdout, or it can be destructive when called with the `decrypt-inplace` option in which case it will overwrite the file with the decrypted content.
+
+### Preparing the register file
+
+The register is a simple text file containing the relative paths to the files I want to encrypt or decrypt. For example:
+
+```text
+# register.txt
+file1
+file2
+file3
+folder/file4
+```
+
+To combine this file with the sops script I will use the following command:
+
+```bash
+cat register.txt | xargs ./sops.sh encrypt
+```
+
+This will read each line from `register.txt` and pass it as an argument to the `sops.sh` script for encryption or decryption. Similarly, I can use the same command to decrypt/encrypt the files individually:
+
+```bash
+././sops.sh encrypt file1
+./sops.sh decrypt file2
+```
 
 ## Closing thoughts
 
