@@ -1,6 +1,7 @@
 ---
 title: "MicroOS for DevOps and automation"
 date: 2021-08-11T19:18:55+07:00
+toc: true
 descriptiom: Keynote
 tldr:  My talk at openSUSE Asia Virtual Summit 2021 on MicroOS and DevOps
 tags: ["openSUSE","MicroOS","OpenStorage","keynote"]
