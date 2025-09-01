@@ -1,6 +1,7 @@
 ---
 title: "Podman quick start"
 date: 2021-02-10T09:38:16+07:00
+toc: true
 descriptiom: General introduction to Podman 
 tags: ["Podman","container","automation"]
 ---

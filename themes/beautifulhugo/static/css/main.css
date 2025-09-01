@@ -1133,3 +1133,30 @@ ul.share li:hover .fab {
 .copyCodeButton:hover {
   background-color: #e0e0e0;
 }
+
+#toc-container {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 20px;
+}
+
+/* --- Anchor links for headings --- */
+.anchor {
+  visibility: hidden;
+  margin-left: 0.25em;
+  color: #888;
+  text-decoration: none;
+}
+
+h1:hover .anchor,
+h2:hover .anchor,
+h3:hover .anchor,
+h4:hover .anchor,
+h5:hover .anchor,
+h6:hover .anchor {
+  visibility: visible;
+}
+
+.anchor:hover {
+  color: #555;
+}

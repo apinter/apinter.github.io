@@ -4,6 +4,7 @@ author: ""
 type: ""
 date: 2025-08-22T01:08:06+07:00
 subtitle: ""
+toc: true
 image: ""
 tags: [
   "sops",

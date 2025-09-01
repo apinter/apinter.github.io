@@ -1,6 +1,7 @@
 ---
 title: "Initial Commit"
 date: 2021-01-31T19:33:46+07:00
+toc: true
 tldr: First entry on this blog explaining what technical greatness will be shared here by yours truly. This series is more of a collection of tools, references and practices for me. If you find something useful feel free to use it. 
 tags: ["first","todo"]
 ---

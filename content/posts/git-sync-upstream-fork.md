@@ -1,6 +1,7 @@
 ---
 title: "Syncing a fork with upstream"
 date: 2021-02-03T10:16:19+07:00
+toc: true
 tldr: Configure a remote for a fork by adding the upstream `git remote add upstream https://github.com/ORIGINAL_OWNER/ORIGINAL_REPOSITORY.git` then make sure the remote has been added by listing remotes `git remote -v`. Fetch the branches and commits from upstream `git fetch upstream`, checkout to your forks default branch and merge the changes 'git checkout main' and 'git merge upstream/main'.
 tags: ["git","fork","workflow"]
 ---

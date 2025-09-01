@@ -1,8 +1,14 @@
 {{ define "main" }}
 <div class="container" role="main">
   <div class="row">
-    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+    <div class="col-lg-9 col-md-9 col-sm-12">
       <article role="main" class="blog-post">
+        {{ if .Params.toc }}
+          <div class="visible-sm visible-xs">
+            <h4>Table of Contents</h4>
+            {{ .TableOfContents }}
+          </div>
+        {{ end }}
         {{ .Content }}
 
         {{ if .Params.tags }}
@@ -102,6 +108,14 @@
         {{ end }}
       {{ end }}
 
+    </div>
+    <div class="col-lg-3 col-md-3 hidden-sm hidden-xs">
+      {{ if .Params.toc }}
+        <div id="toc-container">
+            <h4>Table of Contents</h4>
+            {{ .TableOfContents }}
+        </div>
+      {{ end }}
     </div>
   </div>
 </div>
